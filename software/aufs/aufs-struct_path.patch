@@ -1,0 +1,11 @@
+--- aufs-cvs-20090202.ori/fs/aufs/vfsub.h	2009-01-26 07:24:45.000000000 +0100
++++ aufs-cvs-20090202/fs/aufs/vfsub.h	2009-02-02 13:51:33.000000000 +0100
+@@ -575,7 +575,7 @@
+ 
+ /* ---------------------------------------------------------------------- */
+ 
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 20)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 18)
+ /* introduced in linux-2.6.20 */
+ struct path {
+ 	struct vfsmount *mnt;

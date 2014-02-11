@@ -1,0 +1,211 @@
+#!/bin/sh
+
+# Copyright (C) 2005, 2006, 2007 Junjiro Okajima
+#
+# This program, aufs is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+# $Id: aufs-unionctl.static 334 2010-05-27 14:37:54Z throck $
+
+# simple script for controling aufs.
+# compatible with unionctl(8) in unionfs(5).
+# if you use "mount -o remount" to add/del/mod branches,
+# this scirpt is unnecessary.
+
+PATH=/usr/bin:/usr/sbin:/bin:/sbin
+export PATH
+eecho() { echo "$@" 1>&2; }
+
+me=`basename $0`
+err=0
+usage()
+{
+	eecho "${me}: $@"
+	eecho usage:
+	eecho "${me}" union_dir --add \
+		'[ --before | --after bindex | branch ]' '[ --mode perm ]' branch
+	eecho "${me}" union_dir --remove branch
+	eecho "${me}" union_dir --mode branch perm
+	eecho "${me}" union_dir --list
+	eecho "${me}" union_dir '--whereis | --query1 | --q1' path_under_union '[ ,,, ]'
+	err=1
+}
+
+conv() # [escape]
+{
+	sed -r -e '
+	s/\\/\\134/g
+	s/$/\\012/
+	' |
+	tr -d '\n' |
+	sed -r -e '
+	s/ /\\040/g
+	s/\t/\\011/g
+	s/\r/\\015/g
+	s/\\012$//
+	' |
+	{ test "$1" = "escape" && sed -r -e 's/\\/\\\\/g' || cat; }
+	echo
+}
+
+tgt=
+branches()
+{
+	echo "$tgt" |
+	tr ',' '\n' |
+	egrep '^(dirs|br)[=:]' |
+	sed -r -e 's/^(dirs|br)[=:]//' |
+	tr ':=' '\n '
+}
+
+########################################
+
+test $# -lt 2 && eecho "${me}: bad arg $@" && exit 1
+f=/proc/mounts
+test ! -f $f && eecho "${me}: $f is necessary" && exit 1
+
+set -e
+#set -x; echo $@
+tmp=/tmp/$$
+cd "$1"
+mntpnt="$PWD"
+e_mntpnt=`echo "$mntpnt" | conv escape`
+cd "$OLDPWD"
+action="$2"
+shift 2
+
+tgt=`grep "aufs $e_mntpnt" $f | tail -1 | rev | cut -f3- -d' ' | rev`
+test "$tgt" = "" && eecho "${me}: no such mntpnt $mntpnt" && exit 1
+dev=`echo "$tgt" | sed -e 's: '"$mntpnt aufs"' .*$::`
+branches > $tmp
+#cat $tmp | while read i; do echo $i; done; exit
+
+find_bindex() # dir
+{
+	echo "$1" | grep -q '^[0-9]*$' && echo "$1" && return 0
+	local i n err
+	n=0
+	cat $tmp | rev | cut -f2- -d' ' | rev |
+	while read i
+	do
+		test "$i" = "$1" && echo $n && return 0
+		n=`expr $n + 1`
+	done
+	err=$?
+	test $err -eq 0 && return 0
+	rm -f $tmp
+	eecho "${me}: no such branch $1"
+	echo -2
+	return 1
+}
+
+Remount() #options...
+{
+	rm -f $tmp
+	local mount212p=0
+	{ mount --version 2> /dev/null || :; } | fgrep -q mount-2.12p && mount212p=1
+	test $mount212p -eq 1 && exec mount -o remount,"$@" "$mntpnt"
+	exec mount -o remount,"$@" "$dev" "$mntpnt"
+}
+
+do_add()
+{
+	local bindex perm br
+	bindex=0
+	perm=rw # unionfs default
+	br=
+	while [ "$br" = "" ]
+	do
+		case "$1" in
+		--before)	bindex=`find_bindex "$2"`
+				bindex=`expr $bindex - 1` || :
+				;;
+		--after)	bindex=`find_bindex "$2"`
+				bindex=`expr $bindex + 1` || :
+				;;
+		--mode)		perm="$2";;
+		--*)		eecho "${me}: unkown option $1"; return 1;;
+		*)		br="$1"
+		esac
+		test "$br" = "" && shift 2 || :
+	done
+
+	test $# -ne 1 && eecho "${me}: bad arg $@" && return 1
+	br="$1"
+	test $bindex -lt 0 && bindex=0 || :
+	Remount add:${bindex}:"${br}"="$perm"
+}
+
+do_del()
+{
+	test $# -ne 1 && eecho "${me}: bad arg $@" && return 1
+	Remount del:"$1"
+}
+
+do_mod()
+{
+	test $# -ne 2 && eecho "${me}: bad arg $@" && return 1
+	Remount mod:"$1"="$2"
+}
+
+do_list()
+{
+	local path mode
+	cat $tmp | rev |
+	while read mode path
+	do
+		mode=`echo $mode | rev`
+		path=`echo "$path" | rev`
+		case $mode in
+		ro)	mode="r--";;
+		rw)	mode="rw-";;
+		ro+wh)	mode="R--";;
+		*)	mode="---";;
+		esac
+		/bin/echo -e \\t"$path" \(${mode}\)
+	done
+}
+
+do_query1()
+{
+	local path i f
+	cat $tmp | rev | cut -f2- -d' ' | rev |
+	while read path
+	do
+		for i
+		do
+			i=`echo "$i" | sed -e 's:^/::'`
+			test -e "$mntpnt/$i" || continue
+			f="$path/$i"
+			test -e "$f" && if [ $# -eq 1 ]
+			then echo "$path"
+			else echo "$f"
+			fi || :
+		done
+	done
+}
+
+case "$action" in
+--add)		do_add "$@";;
+--remove)	do_del "$@";;
+--mode)		do_mod "$@";;
+--list)		do_list;;
+--q1|--query1|--whereis)
+		do_query1 "$@";;
+--query)	usage "unsupported action $action"; err=1;;
+*)		usage "unkown action $action"; err=1;;
+esac
+
+rm -f $tmp $tmp.*
+exit $err
