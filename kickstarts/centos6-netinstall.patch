@@ -1,0 +1,53 @@
+--- /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-base.cfg	2013-05-29 21:39:48.102212419 -0400
++++ /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-netinstall.cfg	2013-05-29 20:16:00.651303032 -0400
+@@ -1,5 +1,5 @@
+ install
+-url --url=http://linux.mirrors.es.net/centos/6/os/i386
++url --url=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH]
+ 
+ ##############################
+ # System Configuration
+@@ -35,11 +35,11 @@
+ ##############################
+ # Repository Configuration
+ ##############################
+-repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/i386 --excludepkgs=kernel*
+-repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
+-repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
+-repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
+-repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
++repo --name=a-base	--baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*
++repo --name=a-updates	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
++repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-[BUILD_ARCH]
++repo --name=a-Internet2	--baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
++repo --name=a-Web100	--baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
+ 
+ ##############################
+ # Install Packages
+@@ -147,6 +147,26 @@
+ %post --log=/root/post_install.log
+ 
+ ##############################
++# Resize default partition layout.
++# Interactive mode breaks partitioning 
++# commands so have to do it here.
++##############################
++# Backup /home though probably not much in it
++cp -r /home /home.bak
++# Remove the partition
++umount /dev/mapper/VolGroup-lv_home
++lvremove -f /dev/VolGroup/lv_home
++# restore home. might already be there by default, hence the somewhat round-about copying
++mkdir -p /home
++mv /home.bak/* /home/
++rm -rf /home.bak/
++#Expand the root partition
++lvextend -r -l +100%FREE /dev/VolGroup/lv_root
++#Update fstab so it doesnt look for /home
++grep -v "VolGroup-lv_home" /etc/fstab > /etc/fstab.new
++mv -f /etc/fstab.new /etc/fstab
++
++##############################
+ # Initialize the MySQL Databases
+ ##############################
+ /sbin/service mysqld start
