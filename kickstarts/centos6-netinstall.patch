@@ -12,13 +12,13 @@
  # Repository Configuration
  ##############################
 -repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/i386 --excludepkgs=kernel*
--repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
--repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
+-repo --name=a-updates   --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
+-repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
 +repo --name=a-base	--baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-updates	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-[BUILD_ARCH]
++repo --name=a-updates	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
++repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-[BUILD_ARCH]
 +repo --name=a-Internet2	--baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100	--baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
  
