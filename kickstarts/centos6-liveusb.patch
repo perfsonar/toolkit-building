@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-base.cfg	2013-05-29 21:39:48.102212419 -0400
-+++ /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-liveusb.cfg	2013-05-29 20:18:16.935166845 -0400
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-06-19 11:30:49.311640365 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-liveusb.cfg	2014-06-19 11:30:49.321640154 -0700
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
