@@ -1,5 +1,10 @@
+<<<<<<< Updated upstream
 --- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-06-19 11:30:49.311640365 -0700
 +++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-06-19 11:30:49.342639654 -0700
+=======
+--- /home/mockbuild/svn_repos/nptoolkit-trunk/kickstarts/centos6-base.cfg	2013-10-25 15:56:24.324822360 -0400
++++ /home/mockbuild/svn_repos/nptoolkit-trunk/kickstarts/centos6-netinstall.cfg	2014-02-03 22:26:08.393956021 -0500
+>>>>>>> Stashed changes
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
