@@ -1,7 +1,7 @@
 diff -ur -N a/aufs2.2-standalone-2.6.32.patch b/aufs2.2-standalone-2.6.32.patch
 --- a/aufs2.2-standalone-2.6.32.patch	1969-12-31 19:00:00.000000000 -0500
 +++ b/aufs2.2-standalone-2.6.32.patch	2014-02-06 14:21:58.083405378 -0500
-@@ -0,0 +1,566 @@
+@@ -0,0 +1,564 @@
 +diff -ur a/fs/dcache.c b/fs/dcache.c
 +--- a/fs/dcache.c	2012-06-20 07:22:55.000000000 -0700
 ++++ b/fs/dcache.c	2012-07-19 11:04:39.000000000 -0700
@@ -306,17 +306,15 @@ diff -ur -N a/aufs2.2-standalone-2.6.32.patch b/aufs2.2-standalone-2.6.32.patch
 +diff -ur a/include/linux/namei.h b/include/linux/namei.h
 +--- a/include/linux/namei.h	2012-06-20 07:22:25.000000000 -0700
 ++++ b/include/linux/namei.h	2012-07-19 11:01:09.000000000 -0700
-+@@ -75,6 +75,10 @@
-+ extern struct file *lookup_instantiate_filp(struct nameidata *nd, struct dentry *dentry,
-+ 		int (*open)(struct inode *, struct file *));
-+ 
++@@ -79,4 +79,8 @@
++ extern int kern_path_mountpoint(int, const char *, struct path *, unsigned int);
++
 ++extern struct dentry *lookup_hash(struct nameidata *nd);
 ++extern int __lookup_one_len(const char *name, struct qstr *this,
-++		struct dentry *base, int len);
+++       struct dentry *base, int len);
 ++
 + extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 + extern struct dentry *lookup_one_noperm(const char *, struct dentry *);
-+ 
 +diff -ur a/include/linux/splice.h b/include/linux/splice.h
 +--- a/include/linux/splice.h	2009-12-02 19:51:21.000000000 -0800
 ++++ b/include/linux/splice.h	2012-07-19 11:01:09.000000000 -0700
@@ -628,12 +626,12 @@ diff -ur -N a/kernel.spec b/kernel.spec
  %endif
  
  %changelog
-+* Mon Jan 6 2014 Andy Lake <andy@es.net> [2.6.32-431.3.1.el6.web100]
++* Fri Jun 20 2014 Michael Johnson <mj82@grnoc.iu.edu> [2.6.32-431.20.3.el6.web100]
 +- Adding web100 and aufs patches for perfSONAR Toolkit
 +
- * Fri Jan  3 2014 Johnny Hughes <johnny@centos.org> [2.6.32-431.3.1.el6]
+ * Thu Jun 19 2014 Johnny Hughes <johnny@centos.org> [2.6.32-431.20.3.el6.centos]
  - Roll in CentOS Branding
- 
+
 diff -ur -N a/Makefile.patch b/Makefile.patch
 --- a/Makefile.patch	1969-12-31 19:00:00.000000000 -0500
 +++ b/Makefile.patch	2014-02-06 14:21:58.076405378 -0500
