@@ -51,8 +51,8 @@ done
 BUILD=pS-Performance_Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.3"
-BUILD_RELEASE="rc2"
+BUILD_VERSION="3.3.2"
+BUILD_RELEASE=""
 BUILD_TYPE=LiveUSB
 if [ -z $BUILD_ARCH ]; then
 	BUILD_ARCH=i386
@@ -168,7 +168,7 @@ function unmountPartition()
 # ISO Configuration
 ##############################
 # Check for valid disk image or create new one
-ISO=$BUILD-$BUILD_VERSION$BUILD_RELEASE-$BUILD_TYPE-$BUILD_ARCH.iso
+ISO="../resources/${BUILD}-${BUILD_VERSION}${BUILD_RELEASE}-${BUILD_TYPE}-${BUILD_ARCH}.iso"
 if [ -n "$2" ]; then
 	if [ -s "$2" ]; then
 		ISO=$2
@@ -235,7 +235,7 @@ fi
 ##############################
 # Copy Disk Image to Flash Drive
 ##############################
-echo -e "\n" | livecd-iso-to-disk ../resources/$ISO $PARTITION
+echo -e "\n" | livecd-iso-to-disk $ISO $PARTITION
 if [ $? != 0 ]; then
 	echo "Couldn't copy disk image to $PARTITION."
 	echo "Either livecd-tools isn't installed or is not up to date."

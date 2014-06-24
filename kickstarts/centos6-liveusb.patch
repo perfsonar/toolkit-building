@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-base.cfg	2013-05-29 21:39:48.102212419 -0400
-+++ /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-liveusb.cfg	2013-05-29 20:18:16.935166845 -0400
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-06-20 09:08:48.406959108 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-liveusb.cfg	2014-06-20 09:08:48.407959084 -0700
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -23,7 +23,7 @@
  
  ##############################
  # Installation Configuration
-@@ -35,11 +38,11 @@
+@@ -35,13 +38,13 @@
  ##############################
  # Repository Configuration
  ##############################
@@ -33,14 +33,17 @@
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
 +repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-[BUILD_ARCH]
++repo --name=a-updates   --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
++repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-[BUILD_ARCH]
 +repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
+ repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
+-repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
++repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/[BUILD_ARCH]/
  
  ##############################
  # Install Packages
-@@ -125,6 +128,7 @@
+@@ -133,6 +136,7 @@
  owamp-server
  
  perl-perfSONAR_PS-Toolkit
@@ -48,7 +51,7 @@
  perl-perfSONAR_PS-Toolkit-SystemEnvironment
  
  perl-perfSONAR_PS-LSCacheDaemon
-@@ -144,7 +148,10 @@
+@@ -152,7 +156,18 @@
  ##############################
  # Run Post Scripts
  ##############################
@@ -57,10 +60,27 @@
 +
 +cp /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 +/usr/sbin/chroot $INSTALL_ROOT <<EOS
++
++##############################
++# Make sure some permissions are correct
++##############################
++chown mysql:mysql /var/run/mysqld
++chown perfsonar:perfsonar /opt/SimpleLS/bootstrap/etc/*
++chown perfsonar:perfsonar /opt/perfsonar_ps/*/etc/*
++chown apache:apache /opt/perfsonar_ps/serviceTest/etc/*
  
  ##############################
  # Initialize the MySQL Databases
-@@ -157,4 +164,32 @@
+@@ -162,7 +177,41 @@
+ /sbin/service mysqld stop
+ 
+ ##############################
++# Add the LiveUSB keyword
++##############################
++echo "site_project=pS-NPToolkit-LiveUSB" >> /opt/perfsonar_ps/toolkit/etc/administrative_info
++echo "site_project=pS-NPToolkit-LiveUSB" >> /opt/perfsonar_ps/ls_registration_daemon/etc/ls_registration_daemon.conf
++
++##############################
  # Disable Readahead
  ##############################
  sed -i 's/=\"yes\"/=\"no\"/g' /etc/sysconfig/readahead

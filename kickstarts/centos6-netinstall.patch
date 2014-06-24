@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-base.cfg	2013-05-29 21:39:48.102212419 -0400
-+++ /home/mockbuild/svn_repos/nptoolkit/branches/CentOS_6.4/kickstarts/centos6-netinstall.cfg	2013-05-29 20:16:00.651303032 -0400
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-06-20 09:08:48.406959108 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-06-20 09:08:48.407959084 -0700
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -7,7 +7,7 @@
  
  ##############################
  # System Configuration
-@@ -35,11 +35,11 @@
+@@ -35,13 +35,13 @@
  ##############################
  # Repository Configuration
  ##############################
@@ -17,14 +17,17 @@
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
 +repo --name=a-base	--baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-updates	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
-+repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-[BUILD_ARCH]
++repo --name=a-updates	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
++repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-[BUILD_ARCH]
 +repo --name=a-Internet2	--baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100	--baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
+ repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
+-repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
++repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/[BUILD_ARCH]/
  
  ##############################
  # Install Packages
-@@ -147,6 +147,26 @@
+@@ -155,6 +155,26 @@
  %post --log=/root/post_install.log
  
  ##############################
