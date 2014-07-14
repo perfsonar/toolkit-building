@@ -82,5 +82,6 @@ else
 fi
 popd > /dev/null 2>&1
 
-
+pushd $REVISOR_CONF_DIRECTORY
 revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-dvd --debug 9 --config $REVISOR_CONF_DIRECTORY/revisor.conf --destination-directory `pwd`
+popd
