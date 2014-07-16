@@ -56,8 +56,8 @@ if [ "$BUILD_ARCH" != "$ARCH" -a -z "$CHROOT" -a -z "$BUILD_CHROOT" ]; then
 fi
 
 ##############################
-BUILD=pS-Performance_Toolkit
-BUILD_SHORT=pS-Toolkit
+BUILD="perfSONAR Toolkit"
+BUILD_SHORT="pS-Toolkit"
 BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_VERSION="3.3.2"
 BUILD_RELEASE=""
@@ -109,7 +109,7 @@ if [ "$BUILD_CHROOT" == "1" ]; then
     fi
 
     CHROOT=`mktemp -d`
-    $SCRIPTS_DIRECTORY/build_revisor_chroot.sh $CHROOT
+    $SCRIPTS_DIRECTORY/build_revisor_chroot.sh $CHROOT $BUILD_ARCH
 fi
 
 if [ -z "$CHROOT" ]; then
@@ -129,7 +129,7 @@ PATCHED_KICKSTART=`basename $PATCHED_KICKSTART`
 cat > $CHROOT_REVISOR_BUILD/build_dvd.sh <<EOF
 #!/bin/bash
 pushd $REVISOR_BUILD
-revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-dvd --debug 9 --config revisor.conf --destination-directory \`pwd\`
+revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-basename "$BUILD_SHORT" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-dvd --debug 9 --config revisor.conf --destination-directory \`pwd\`
 popd
 EOF
 
