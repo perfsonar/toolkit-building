@@ -1,5 +1,5 @@
-diff --git centos6-base.cfg centos6-base.cfg
-index 32d0318..af25499 100644
+diff --git centos6-base.cfg b/Toolkit_Building/kickstarts/centos6-base.cfg
+index 32d0318..6df1e18 100644
 --- centos6-base.cfg
 +++ centos6-base.cfg
 @@ -1,5 +1,5 @@
@@ -41,8 +41,13 @@ index 32d0318..af25499 100644
  authconfig
  bash
  binutils
-@@ -100,7 +103,7 @@ epel-release
- centos-release-SCL
+@@ -97,10 +101,11 @@ xkeyboard-config
+ epel-release
+ 
+ # SCL 
+-centos-release-SCL
++#NOTE: The #x86_64 at the start of the line tells the build scripts to only include for x86_64
++#x86_64centos-release-SCL
  
  #datastax (cassandra yum repo)
 -datastax-repo
