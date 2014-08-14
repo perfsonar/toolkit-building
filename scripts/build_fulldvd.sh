@@ -129,7 +129,7 @@ PATCHED_KICKSTART=`basename $PATCHED_KICKSTART`
 cat > $CHROOT_REVISOR_BUILD/build_dvd.sh <<EOF
 #!/bin/bash
 pushd $REVISOR_BUILD
-revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-basename "$BUILD_SHORT" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-dvd --debug 9 --config revisor.conf --destination-directory \`pwd\`
+revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-basename "$BUILD_SHORT" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-usb --install-dvd --usb-size 1G --debug 9 --config revisor.conf --destination-directory \`pwd\`
 popd
 EOF
 
@@ -138,5 +138,6 @@ chmod +x $CHROOT_REVISOR_BUILD/build_dvd.sh
 setarch $BUILD_ARCH chroot $CHROOT $REVISOR_BUILD/build_dvd.sh
 
 mv $CHROOT_REVISOR_BUILD/pspt-$BUILD_ARCH/iso/* .
+mv $CHROOT_REVISOR_BUILD/pspt-$BUILD_ARCH/usb/* .
 
-#rm -rfv $CHROOT_REVISOR_BUILD
+rm -rfv $CHROOT_REVISOR_BUILD
