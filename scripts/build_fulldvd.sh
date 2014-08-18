@@ -129,7 +129,7 @@ PATCHED_KICKSTART=`basename $PATCHED_KICKSTART`
 cat > $CHROOT_REVISOR_BUILD/build_dvd.sh <<EOF
 #!/bin/bash
 pushd $REVISOR_BUILD
-revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-basename "$BUILD_SHORT" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-usb --install-dvd --usb-size 1G --debug 9 --config revisor.conf --destination-directory \`pwd\`
+revisor --cli --respin --model pspt-$BUILD_ARCH --product-version "$BUILD_VERSION" --iso-basename "$BUILD_SHORT" --iso-label "$BUILD_SHORT" --product-name "$BUILD" --kickstart $PATCHED_KICKSTART --kickstart-include --kickstart-default --install-dvd --usb-size 1G --debug 9 --config revisor.conf --destination-directory \`pwd\`
 popd
 EOF
 
@@ -137,7 +137,49 @@ chmod +x $CHROOT_REVISOR_BUILD/build_dvd.sh
 
 setarch $BUILD_ARCH chroot $CHROOT $REVISOR_BUILD/build_dvd.sh
 
+for ISO in $CHROOT_REVISOR_BUILD/pspt-$BUILD_ARCH/iso/*iso; do
+#for ISO in *iso; do
+    TEMP_ISO_MNT=`mktemp -d`
+    TEMP_NEW_ISO_MNT=`mktemp -d`
+
+    echo "Placing kickstart into initrd.img"
+    mount -o loop $ISO $TEMP_ISO_MNT
+
+    rmdir $TEMP_NEW_ISO_MNT
+
+    cp -Ra $TEMP_ISO_MNT $TEMP_NEW_ISO_MNT
+
+    umount $TEMP_ISO_MNT
+
+    cp $TEMP_NEW_ISO_MNT/ks.cfg $TEMP_NEW_ISO_MNT/isolinux/ks.cfg
+
+    pushd $TEMP_NEW_ISO_MNT/isolinux
+    mv initrd.img initrd.img.xz
+    xz --format=lzma initrd.img.xz --decompress
+    echo ks.cfg | cpio -c -o -A -F initrd.img
+    xz --format=lzma initrd.img
+    mv initrd.img.lzma initrd.img
+    rm ks.cfg
+    popd
+
+    echo "Updating isolinux configuration."
+    sed -i "s|cdrom:/|file:///|g" $TEMP_NEW_ISO_MNT/isolinux/isolinux.cfg
+
+    mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table -input-charset UTF-8 -V "$BUILD_SHORT" -p "$0" -A "$BUILD" -b isolinux/isolinux.bin -c isolinux/boot.cat -x “lost+found” -o $ISO $TEMP_NEW_ISO_MNT
+
+    echo "Implanting MD5 in ISO."
+    if [ -a /usr/bin/implantisomd5 ]; then
+        /usr/bin/implantisomd5 $ISO
+    elif [ -a /usr/lib/anaconda-runtime/implantisomd5 ]; then
+        /usr/lib/anaconda-runtime/implantisomd5 $ISO
+    else
+        echo "Package isomd5 not installed."
+    fi
+
+    echo "Running isohbyrid on ISO."
+    isohybrid $ISO
+done
+
 mv $CHROOT_REVISOR_BUILD/pspt-$BUILD_ARCH/iso/* .
-mv $CHROOT_REVISOR_BUILD/pspt-$BUILD_ARCH/usb/* .
 
 rm -rfv $CHROOT_REVISOR_BUILD
