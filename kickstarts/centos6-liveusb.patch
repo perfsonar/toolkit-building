@@ -1,5 +1,5 @@
---- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-06-20 09:08:48.406959108 -0700
-+++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-liveusb.cfg	2014-06-20 09:08:48.407959084 -0700
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-26 10:18:22.802400894 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-liveusb.cfg	2014-08-26 10:18:22.803400873 -0700
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -11,7 +11,7 @@
  zerombr
  bootloader --location=mbr
  
--clearpart --all
+-#clearpart --all
 -
 -network --onboot=yes
 +# Specify network boot devices for LiveCD
@@ -23,7 +23,7 @@
  
  ##############################
  # Installation Configuration
-@@ -35,13 +38,13 @@
+@@ -35,11 +38,11 @@
  ##############################
  # Repository Configuration
  ##############################
@@ -38,12 +38,9 @@
 +repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
  repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
--repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
-+repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/[BUILD_ARCH]/
  
  ##############################
- # Install Packages
-@@ -133,6 +136,7 @@
+@@ -129,6 +132,7 @@
  owamp-server
  
  perl-perfSONAR_PS-Toolkit
@@ -51,7 +48,7 @@
  perl-perfSONAR_PS-Toolkit-SystemEnvironment
  
  perl-perfSONAR_PS-LSCacheDaemon
-@@ -152,7 +156,18 @@
+@@ -148,7 +152,18 @@
  ##############################
  # Run Post Scripts
  ##############################
@@ -71,7 +68,7 @@
  
  ##############################
  # Initialize the MySQL Databases
-@@ -162,7 +177,41 @@
+@@ -158,7 +173,41 @@
  /sbin/service mysqld stop
  
  ##############################
