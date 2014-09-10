@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-06 18:55:04.631024574 -0400
-+++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-08-06 18:57:54.953157448 -0400
+--- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
++++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-09-10 12:00:33.563233479 -0400
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -7,15 +7,6 @@
  
  ##############################
  # System Configuration
-@@ -22,7 +22,7 @@
- zerombr
- bootloader --location=mbr
- 
--#clearpart --all
-+#clearpart --all
- 
- network --onboot=yes
- 
 @@ -35,11 +35,11 @@
  ##############################
  # Repository Configuration
@@ -33,7 +24,15 @@
  repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
  
  ##############################
-@@ -151,6 +151,26 @@
+@@ -133,6 +133,7 @@
+ perl-perfSONAR_PS-LSCacheDaemon
+ perl-perfSONAR_PS-LSRegistrationDaemon
+ perl-perfSONAR_PS-MeshConfig-Agent
++perl-perfSONAR_PS-SimpleLS-BootStrap-client
+ %end
+ 
+ ##############################
+@@ -141,6 +142,26 @@
  %post --log=/root/post_install.log
  
  ##############################
@@ -57,6 +56,6 @@
 +mv -f /etc/fstab.new /etc/fstab
 +
 +##############################
- # Initialize the MySQL Databases
+ # Disable Readahead
  ##############################
- /sbin/service mysqld start
+ sed -i 's/=\"yes\"/=\"no\"/g' /etc/sysconfig/readahead

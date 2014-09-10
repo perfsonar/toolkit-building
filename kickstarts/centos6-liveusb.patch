@@ -1,4 +1,4 @@
---- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-06 18:55:04.631024574 -0400
+--- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
 +++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-liveusb.cfg	2014-08-06 18:55:04.631024574 -0400
 @@ -1,5 +1,5 @@
  install
@@ -40,7 +40,15 @@
  repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
  
  ##############################
-@@ -129,6 +132,7 @@
+@@ -69,6 +72,7 @@
+ libgcc
+ libgomp
+ libpcap
++mysql
+ mysql-devel
+ ntp
+ passwd
+@@ -128,20 +132,82 @@
  owamp-server
  
  perl-perfSONAR_PS-Toolkit
@@ -48,7 +56,19 @@
  perl-perfSONAR_PS-Toolkit-SystemEnvironment
  
  perl-perfSONAR_PS-LSCacheDaemon
-@@ -148,7 +152,18 @@
+ perl-perfSONAR_PS-LSRegistrationDaemon
+ perl-perfSONAR_PS-MeshConfig-Agent
++perl-perfSONAR_PS-PingER-server
++perl-perfSONAR_PS-SimpleLS-BootStrap-client
++perl-perfSONAR_PS-SNMPMA
++perl-perfSONAR_PS-TracerouteMA-client
++perl-perfSONAR_PS-TracerouteMA-config
++perl-perfSONAR_PS-TracerouteMA-server
++perl-perfSONAR_PS-perfSONARBUOY-client
++perl-perfSONAR_PS-perfSONARBUOY-config
++perl-perfSONAR_PS-perfSONARBUOY-server
+ %end
+ 
  ##############################
  # Run Post Scripts
  ##############################
@@ -65,19 +85,21 @@
 +chown perfsonar:perfsonar /opt/SimpleLS/bootstrap/etc/*
 +chown perfsonar:perfsonar /opt/perfsonar_ps/*/etc/*
 +chown apache:apache /opt/perfsonar_ps/serviceTest/etc/*
- 
- ##############################
- # Initialize the MySQL Databases
-@@ -158,7 +173,41 @@
- /sbin/service mysqld stop
- 
- ##############################
++
++##############################
++# Initialize the MySQL Databases
++##############################
++/sbin/service mysqld start
++/opt/perfsonar_ps/toolkit/scripts/initialize_databases
++/sbin/service mysqld stop
++
++##############################
 +# Add the LiveUSB keyword
 +##############################
 +echo "site_project=pS-NPToolkit-LiveUSB" >> /opt/perfsonar_ps/toolkit/etc/administrative_info
 +echo "site_project=pS-NPToolkit-LiveUSB" >> /opt/perfsonar_ps/ls_registration_daemon/etc/ls_registration_daemon.conf
-+
-+##############################
+ 
+ ##############################
  # Disable Readahead
  ##############################
  sed -i 's/=\"yes\"/=\"no\"/g' /etc/sysconfig/readahead

@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-06 18:55:04.631024574 -0400
-+++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-fullinstall.cfg	2014-09-05 02:09:37.371498721 -0400
+--- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
++++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-fullinstall.cfg	2014-09-10 12:00:52.571830287 -0400
 @@ -1,5 +1,4 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -43,3 +43,11 @@
  authconfig
  bash
  binutils
+@@ -133,6 +124,7 @@
+ perl-perfSONAR_PS-LSCacheDaemon
+ perl-perfSONAR_PS-LSRegistrationDaemon
+ perl-perfSONAR_PS-MeshConfig-Agent
++perl-perfSONAR_PS-SimpleLS-BootStrap-client
+ %end
+ 
+ ##############################
