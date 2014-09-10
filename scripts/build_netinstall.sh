@@ -220,6 +220,9 @@ else
     echo "Package isomd5 not installed."
 fi
 
+# Make sure the ISO can boot on USB sticks
+isohybrid $OUTPUT_ISO
+
 echo "Generating new MD5: $OUTPUT_MD5."
 md5sum $OUTPUT_ISO > $OUTPUT_MD5
 
