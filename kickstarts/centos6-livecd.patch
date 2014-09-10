@@ -1,5 +1,5 @@
---- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-26 10:18:22.802400894 -0700
-+++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-livecd.cfg	2014-08-26 10:18:22.802400894 -0700
+--- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-06 18:55:04.631024574 -0400
++++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-livecd.cfg	2014-08-06 18:55:04.631024574 -0400
 @@ -1,5 +1,5 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386

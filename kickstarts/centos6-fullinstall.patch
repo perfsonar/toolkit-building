@@ -1,57 +1,45 @@
-diff --git centos6-base.cfg b/Toolkit_Building/kickstarts/centos6-base.cfg
-index 32d0318..6df1e18 100644
---- centos6-base.cfg
-+++ centos6-base.cfg
-@@ -1,5 +1,5 @@
+--- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-08-06 18:55:04.631024574 -0400
++++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-fullinstall.cfg	2014-09-05 02:09:37.371498721 -0400
+@@ -1,5 +1,4 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
-+#url --url=http://linux.mirrors.es.net/centos/6/os/i386
  
  ##############################
  # System Configuration
-@@ -35,13 +35,13 @@ text
+@@ -22,8 +21,6 @@
+ zerombr
+ bootloader --location=mbr
+ 
+-#clearpart --all
+-
+ network --onboot=yes
+ 
  ##############################
- # Repository Configuration
+@@ -33,16 +30,6 @@
+ text
+ 
  ##############################
+-# Repository Configuration
+-##############################
 -repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/i386 --excludepkgs=kernel*
 -repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
 -repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
 -repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
--repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
-+#repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/i386 --excludepkgs=kernel*
-+#repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
-+#repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
-+#repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
-+#repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
-+#repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
-+#repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
- 
- ##############################
+-
+-##############################
  # Install Packages
-@@ -51,6 +51,10 @@ repo --name=a-scl       --baseurl=http://linux.mirrors.es.net/centos/6/SCL/i386/
+ ##############################
+ %packages
+@@ -50,6 +37,10 @@
  @core
  @console-internet
  
 +# Anaconda is needed for revisor to build the DVD
-+anaconda 
-+syslinux 
++anaconda
++syslinux
 +
  authconfig
  bash
  binutils
-@@ -97,10 +101,11 @@ xkeyboard-config
- epel-release
- 
- # SCL 
--centos-release-SCL
-+#NOTE: The #x86_64 at the start of the line tells the build scripts to only include for x86_64
-+#x86_64centos-release-SCL
- 
- #datastax (cassandra yum repo)
--datastax-repo
-+#datastax-repo
- 
- # sk98lin Kernel Modules
- kmod-sk98lin

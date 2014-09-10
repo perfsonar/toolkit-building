@@ -59,7 +59,7 @@ fi
 BUILD="perfSONAR Toolkit"
 BUILD_SHORT="pS-Toolkit"
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.3.2"
+BUILD_VERSION="3.4rc3"
 BUILD_RELEASE=""
 BUILD_OS="CentOS6"
 BUILD_TYPE=FullInstall
