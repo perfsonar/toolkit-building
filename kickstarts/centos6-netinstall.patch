@@ -1,13 +1,19 @@
 --- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
-+++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-09-10 12:00:33.563233479 -0400
-@@ -1,5 +1,5 @@
++++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-09-19 14:13:37.085271814 -0400
+@@ -1,11 +1,9 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
 +url --url=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH]
  
  ##############################
  # System Configuration
-@@ -35,11 +35,11 @@
+ ##############################
+-lang en_US.UTF-8
+-keyboard us
+ timezone --utc America/Los_Angeles
+ 
+ auth --enableshadow --enablemd5
+@@ -35,11 +33,11 @@
  ##############################
  # Repository Configuration
  ##############################
@@ -24,7 +30,7 @@
  repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
  
  ##############################
-@@ -133,6 +133,7 @@
+@@ -133,6 +131,7 @@
  perl-perfSONAR_PS-LSCacheDaemon
  perl-perfSONAR_PS-LSRegistrationDaemon
  perl-perfSONAR_PS-MeshConfig-Agent
@@ -32,7 +38,7 @@
  %end
  
  ##############################
-@@ -141,6 +142,26 @@
+@@ -141,6 +140,26 @@
  %post --log=/root/post_install.log
  
  ##############################
