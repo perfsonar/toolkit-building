@@ -40,7 +40,7 @@ done
 BUILD=pS-Performance_Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.4rc3"
+BUILD_VERSION="3.4"
 BUILD_RELEASE=""
 BUILD_OS="CentOS6"
 BUILD_TYPE=NetInstall
