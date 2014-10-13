@@ -43,11 +43,3 @@
  authconfig
  bash
  binutils
-@@ -133,6 +124,7 @@
- perl-perfSONAR_PS-LSCacheDaemon
- perl-perfSONAR_PS-LSRegistrationDaemon
- perl-perfSONAR_PS-MeshConfig-Agent
-+perl-perfSONAR_PS-SimpleLS-BootStrap-client
- %end
- 
- ##############################

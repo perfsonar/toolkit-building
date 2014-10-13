@@ -30,14 +30,6 @@
  repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
  
  ##############################
-@@ -133,6 +131,7 @@
- perl-perfSONAR_PS-LSCacheDaemon
- perl-perfSONAR_PS-LSRegistrationDaemon
- perl-perfSONAR_PS-MeshConfig-Agent
-+perl-perfSONAR_PS-SimpleLS-BootStrap-client
- %end
- 
- ##############################
 @@ -141,6 +140,26 @@
  %post --log=/root/post_install.log
  
