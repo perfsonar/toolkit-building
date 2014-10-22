@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
-+++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-fullinstall.cfg	2014-09-10 12:00:52.571830287 -0400
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-10-22 07:09:44.408900666 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-fullinstall.cfg	2014-10-22 07:09:44.409900635 -0700
 @@ -1,5 +1,4 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -15,7 +15,7 @@
  network --onboot=yes
  
  ##############################
-@@ -33,16 +30,6 @@
+@@ -33,15 +30,6 @@
  text
  
  ##############################
@@ -26,13 +26,12 @@
 -repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
--repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
 -
 -##############################
  # Install Packages
  ##############################
  %packages
-@@ -50,6 +37,10 @@
+@@ -49,6 +37,10 @@
  @core
  @console-internet
  

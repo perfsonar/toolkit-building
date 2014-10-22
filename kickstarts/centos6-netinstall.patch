@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-09-10 11:59:49.965113195 -0400
-+++ /home/mockbuild/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-09-30 19:24:29.133225937 -0400
+--- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-10-22 07:09:44.408900666 -0700
++++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-10-22 07:09:44.409900635 -0700
 @@ -1,11 +1,9 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -27,10 +27,10 @@
 +repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-[BUILD_ARCH]
 +repo --name=a-Internet2	--baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100	--baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
- repo --name=a-DataStax  --baseurl=http://rpm.datastax.com/community
  
  ##############################
-@@ -141,6 +140,26 @@
+ # Install Packages
+@@ -137,6 +135,26 @@
  %post --log=/root/post_install.log
  
  ##############################
