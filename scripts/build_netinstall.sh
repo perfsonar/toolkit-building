@@ -40,7 +40,7 @@ done
 BUILD=pS-Performance_Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.4"
+BUILD_VERSION="3.4.2"
 BUILD_RELEASE=""
 BUILD_OS="CentOS6"
 BUILD_TYPE=NetInstall
@@ -66,7 +66,7 @@ PATCHED_KICKSTART=`mktemp`
 # ISO Configuration
 ##############################
 ISO_MOUNT_POINT=/mnt/iso
-TEMP_ISO=$SCRIPTS_DIRECTORY/../resources/CentOS-6.5-$BUILD_ARCH-netinstall.iso
+TEMP_ISO=$SCRIPTS_DIRECTORY/../resources/CentOS-6.6-$BUILD_ARCH-netinstall.iso
 OUTPUT_ISO=$BUILD-$BUILD_VERSION$BUILD_RELEASE-$BUILD_TYPE-$BUILD_ARCH.iso
 OUTPUT_MD5=$OUTPUT_ISO.md5
 LOGO_FILE=$SCRIPTS_DIRECTORY/../images/$BUILD-Splash-$BUILD_VERSION.gif
