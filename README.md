@@ -12,9 +12,13 @@ The kickstart files are located under the *kickstarts* directory. If you make an
 
 ##Building the NetInstall
 
+The basic process is as follows:
+
 ```bash
 ./scripts/build_netinstall --arch <i386|x86_64>
 ```
+
+For more detailed instructions see https://github.com/perfsonar/project/wiki/CentOS-Build-Instructions#customizing-the-toolkit-netinstall
 
 ##Building the Full DVD
 See https://github.com/perfsonar/project/wiki/CentOS-Full-DVD-Build-Instructions
