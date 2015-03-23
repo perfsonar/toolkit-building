@@ -1,5 +1,5 @@
---- /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-base.cfg	2014-10-22 07:09:44.408900666 -0700
-+++ /home/alake/svn_repos/perfsonar-ps/Toolkit_Building/kickstarts/centos6-netinstall.cfg	2014-10-22 07:09:44.409900635 -0700
+--- /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-base.cfg	2015-03-23 12:19:50.372884178 -0400
++++ /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-netinstall.cfg	2015-03-12 18:58:33.802440462 -0400
 @@ -1,11 +1,9 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -18,8 +18,8 @@
  # Repository Configuration
  ##############################
 -repo --name=a-base      --baseurl=http://linux.mirrors.es.net/centos/6/os/i386 --excludepkgs=kernel*
--repo --name=a-updates   --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
--repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/branches/epel6-repo/rpms/mirrors-Toolkit-EPEL-i386
+-repo --name=a-updates   --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-i386 --excludepkgs=kernel*
+-repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
 +repo --name=a-base	--baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*

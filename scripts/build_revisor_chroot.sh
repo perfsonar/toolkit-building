@@ -23,7 +23,7 @@ mkdir -p $CHROOT_DIR
 mkdir -p $CHROOT_DIR/var/lib/rpm
 rpm --rebuilddb --root=$CHROOT_DIR
 
-rpm -Uvh --nodeps --root=$CHROOT_DIR  http://mirror.centos.org/centos/6/os/i386/Packages/centos-release-6-5.el6.centos.11.1.i686.rpm
+rpm -Uvh --nodeps --root=$CHROOT_DIR http://mirror.centos.org/centos/6/os/i386/Packages/centos-release-6-6.el6.centos.12.2.i686.rpm 
 
 setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y rpm-build yum
 
