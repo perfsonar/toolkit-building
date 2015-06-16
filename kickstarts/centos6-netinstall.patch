@@ -1,5 +1,5 @@
---- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:19:55.784663610 -0400
-+++ /root/toolkit-building/kickstarts/centos6-netinstall.cfg	2015-06-16 16:19:40.503140363 -0400
+--- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:25:38.970184344 -0400
++++ /root/toolkit-building/kickstarts/centos6-netinstall.cfg	2015-06-16 16:25:30.570442855 -0400
 @@ -1,11 +1,9 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -30,7 +30,7 @@
  repo --name=a-Internet2-staging	--baseurl=http://software.internet2.edu/branches/staging/rpms/el6/[BUILD_ARCH]/main/
  
  ##############################
-@@ -138,6 +136,26 @@
+@@ -139,6 +137,26 @@
  %post --log=/root/post_install.log
  
  ##############################

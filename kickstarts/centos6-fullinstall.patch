@@ -1,5 +1,5 @@
---- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:19:55.784663610 -0400
-+++ /root/toolkit-building/kickstarts/centos6-fullinstall.cfg	2015-06-16 16:09:52.846073529 -0400
+--- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:25:38.970184344 -0400
++++ /root/toolkit-building/kickstarts/centos6-fullinstall.cfg	2015-06-16 16:25:23.470658898 -0400
 @@ -1,5 +1,4 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
