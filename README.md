@@ -22,3 +22,13 @@ For more detailed instructions see https://github.com/perfsonar/project/wiki/Cen
 
 ##Building the Full DVD
 See https://github.com/perfsonar/project/wiki/CentOS-Full-DVD-Build-Instructions
+
+##Pre-releases (Alphas, Release Candidates, etc)
+When preparing a pre-release, use the *pre-releases* branch. It is already setup to point at staging repositories. In some cases you may just need to change the version numbers in the following files:
+* revisor/revisor.conf (2 places)
+* scripts/build_fulldvd.sh
+* scripts/build_netinstall.sh
+
+You should NEVER merge the pre-release branch into the master branch since it contains the staging repos, but you may want to do the reverse to ensure package lists and similar are in sync.
+
+
