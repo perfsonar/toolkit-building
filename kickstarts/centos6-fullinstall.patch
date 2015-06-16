@@ -1,5 +1,5 @@
---- /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-base.cfg	2015-03-23 12:19:50.372884178 -0400
-+++ /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-fullinstall.cfg	2015-03-12 18:58:33.802440462 -0400
+--- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:19:55.784663610 -0400
++++ /root/toolkit-building/kickstarts/centos6-fullinstall.cfg	2015-06-16 16:09:52.846073529 -0400
 @@ -1,5 +1,4 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -15,7 +15,7 @@
  network --onboot=yes
  
  ##############################
-@@ -33,15 +30,6 @@
+@@ -33,16 +30,6 @@
  text
  
  ##############################
@@ -26,12 +26,13 @@
 -repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
+-repo --name=a-Internet2-staging	--baseurl=http://software.internet2.edu/branches/staging/rpms/el6/[BUILD_ARCH]/main/
 -
 -##############################
  # Install Packages
  ##############################
  %packages
-@@ -49,6 +37,10 @@
+@@ -50,6 +37,10 @@
  @core
  @console-internet
  
