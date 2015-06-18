@@ -1,5 +1,5 @@
---- /root/toolkit-building/kickstarts/centos6-base.cfg	2015-06-16 16:25:38.970184344 -0400
-+++ /root/toolkit-building/kickstarts/centos6-netinstall.cfg	2015-06-16 16:25:30.570442855 -0400
+--- /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-base.cfg	2015-06-18 11:59:07.964168524 -0400
++++ /home/mockbuild/svn_repos/toolkit-building/kickstarts/centos6-netinstall.cfg	2015-06-18 11:59:23.988512478 -0400
 @@ -1,11 +1,9 @@
  install
 -url --url=http://linux.mirrors.es.net/centos/6/os/i386
@@ -13,7 +13,7 @@
  timezone --utc America/Los_Angeles
  
  auth --enableshadow --enablemd5
-@@ -35,11 +33,11 @@
+@@ -35,12 +33,12 @@
  ##############################
  # Repository Configuration
  ##############################
@@ -22,14 +22,16 @@
 -repo --name=a-EPEL      --mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-i386
 -repo --name=a-Internet2 --baseurl=http://software.internet2.edu/rpms/el6/i386/main/
 -repo --name=a-Web100    --baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/i386/main/
+-repo --name=a-Internet2-staging	--baseurl=http://software.internet2.edu/branches/staging/rpms/el6/i386/main/
 +repo --name=a-base	--baseurl=http://linux.mirrors.es.net/centos/6/os/[BUILD_ARCH] --excludepkgs=kernel*
 +repo --name=a-updates	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-CentOS-Updates-[BUILD_ARCH] --excludepkgs=kernel*
 +repo --name=a-EPEL	--mirrorlist=http://software.internet2.edu/rpms/el6/mirrors-Toolkit-EPEL-[BUILD_ARCH]
 +repo --name=a-Internet2	--baseurl=http://software.internet2.edu/rpms/el6/[BUILD_ARCH]/main/
 +repo --name=a-Web100	--baseurl=http://software.internet2.edu/web100_kernel/rpms/el6/[BUILD_ARCH]/main/
- repo --name=a-Internet2-staging	--baseurl=http://software.internet2.edu/branches/staging/rpms/el6/[BUILD_ARCH]/main/
++repo --name=a-Internet2-staging	--baseurl=http://software.internet2.edu/branches/staging/rpms/el6/[BUILD_ARCH]/main/
  
  ##############################
+ # Install Packages
 @@ -139,6 +137,26 @@
  %post --log=/root/post_install.log
  
