@@ -41,25 +41,24 @@ BUILD=pS-Performance_Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_VERSION="3.4.2"
-BUILD_RELEASE=""
+BUILD_ID=`date +"%Y%b%d"`
 BUILD_OS="CentOS6"
 BUILD_TYPE=NetInstall
 if [ -z $BUILD_ARCH ]; then
-	BUILD_ARCH=i386
+	BUILD_ARCH=x86_64
 fi
 
 BUILD_OS_LOWER=`echo $BUILD_OS | tr '[:upper:]' '[:lower:]'`
 BUILD_TYPE_LOWER=`echo $BUILD_TYPE | tr '[:upper:]' '[:lower:]'`
 # Assume we're running from the 'scripts' directory
 SCRIPTS_DIRECTORY=`dirname $(readlink -f $0)`
+mkdir -p $SCRIPTS_DIRECTORY/../resources
 
 ##############################
 # Kickstart Configuration
 ##############################
 KICKSTARTS_DIRECTORY=$SCRIPTS_DIRECTORY/../kickstarts
-KICKSTART_FILE=$BUILD_OS_LOWER-base.cfg
-KICKSTART_PATCH=$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.patch
-TEMP_KICKSTART_PATCH=`mktemp`
+KICKSTART_FILE=$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
 PATCHED_KICKSTART=`mktemp`
 
 ##############################
@@ -67,7 +66,7 @@ PATCHED_KICKSTART=`mktemp`
 ##############################
 ISO_MOUNT_POINT=/mnt/iso
 TEMP_ISO=$SCRIPTS_DIRECTORY/../resources/CentOS-6.6-$BUILD_ARCH-netinstall.iso
-OUTPUT_ISO=$BUILD-$BUILD_VERSION$BUILD_RELEASE-$BUILD_TYPE-$BUILD_ARCH.iso
+OUTPUT_ISO=$BUILD-$BUILD_VERSION-$BUILD_TYPE-$BUILD_ARCH-$BUILD_ID.iso
 OUTPUT_MD5=$OUTPUT_ISO.md5
 LOGO_FILE=$SCRIPTS_DIRECTORY/../images/$BUILD-Splash-$BUILD_VERSION.gif
 
@@ -77,19 +76,12 @@ CACHE_DIRECTORY=/var/cache/live
 ##############################
 # Apply Patch
 ##############################
-echo "Applying $KICKSTART_PATCH to $KICKSTART_FILE."
+echo "Patching $KICKSTART_FILE."
 pushd $KICKSTARTS_DIRECTORY > /dev/null 2>&1
 
 # Set correct build architechture
-cp $KICKSTART_PATCH $TEMP_KICKSTART_PATCH
-sed -i "s/\[BUILD_ARCH\]/$BUILD_ARCH/g" $TEMP_KICKSTART_PATCH
-
-if [ -s "$KICKSTART_PATCH" ]; then
-	patch -i $TEMP_KICKSTART_PATCH -p0 $KICKSTART_FILE -o $PATCHED_KICKSTART
-else
-	cp $KICKSTART_FILE $PATCHED_KICKSTART
-	sed -i "s/\[BUILD_ARCH\]/$BUILD_ARCH/g" $PATCHED_KICKSTART
-fi
+cp $KICKSTART_FILE $PATCHED_KICKSTART
+sed -i "s/\[BUILD_ARCH\]/$BUILD_ARCH/g" $PATCHED_KICKSTART
 popd > /dev/null 2>&1
 
 ##############################
@@ -156,19 +148,18 @@ echo "Updating isolinux configuration."
 cat > $TEMP_DIRECTORY/isolinux/boot.msg <<EOF
 17splash.lss
 pS Performance Toolkit    Integrated by ESnet and Internet2  Build Date:
-http://psps.perfsonar.net/toolkit/  Hit enter to continue    $BUILD_DATE
+http://www.perfsonar.net  Hit enter to continue    $BUILD_DATE
 EOF
 
 cat > $TEMP_DIRECTORY/isolinux/isolinux.cfg <<EOF
-default install
-prompt 1
-timeout 60
+default vesamenu.c32
+#prompt 1
+timeout 600
 
 display boot.msg
 
-menu hidden
 menu background splash.jpg
-menu title Welcome to the perfSONAR Performance Toolkit!
+menu title Welcome to perfSONAR Toolkit $BUILD_VERSION!
 menu color border 0 #ffffffff #00000000
 menu color sel 7 #ffffffff #ff000000
 menu color title 0 #ffffffff #00000000
@@ -178,22 +169,26 @@ menu color hotsel 0 #ff000000 #ffffffff
 menu color hotkey 7 #ffffffff #ff000000
 menu color scrollbar 0 #ffffffff #00000000
 
-label install
-	menu label ^Install
-	menu default
-	kernel vmlinuz
-	append initrd=initrd.img text ks=file:///$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg xdriver=vesa nomodeset
+label linux
+  menu label ^Install the perfSONAR Toolkit
+  menu default
+  kernel vmlinuz
+  append initrd=initrd.img ks=file:///$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
+label vesa
+  menu label Install the perfSONAR Toolkit in text mode
+  kernel vmlinuz
+  append initrd=initrd.img text xdriver=vesa nomodeset ks=file:///$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
 label rescue
-	menu label ^Rescue
-	kernel vmlinuz
-	append initrd=initrd.img rescue xdriver=vesa nomodeset
-label memtest
-	menu label ^Memory Test
-	kernel memtest
-	append -
+  menu label ^Rescue installed system
+  kernel vmlinuz
+  append initrd=initrd.img rescue
 label local
-	menu label ^Local Boot
-	localboot 0xffff
+  menu label Boot from ^local drive
+  localboot 0xffff
+label memtest86
+  menu label ^Memory test
+  kernel memtest
+  append -
 EOF
 
 echo "Building boot logo file."
