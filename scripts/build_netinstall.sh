@@ -24,6 +24,15 @@ while [ $# -gt 0 ]; do
 			shift
 			shift
 			;;
+		--iso)
+			ISO=$2
+			if [ -z $ISO ]; then
+				echo "No ISO file specified, exiting..."
+				exit 1
+			fi
+			shift
+			shift
+			;;
 		-*)
 			echo "Invalid arg: $1"
 			exit 1
@@ -34,25 +43,41 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+####################################
+# Configuration that often changes
+####################################
+BUILD_VERSION="3.4.2" #perfSONAR version
+BUILD_OS_VERSION="6.6" #CentOS version
+
 ##############################
 # Build Configuration
 ##############################
+ISO_DOWNLOAD_SERVER="linux.mirrors.es.net"
 BUILD=pS-Performance_Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.4.2"
 BUILD_ID=`date +"%Y%b%d"`
 BUILD_OS="CentOS6"
+BUILD_OS_NAME="CentOS"
 BUILD_TYPE=NetInstall
 if [ -z $BUILD_ARCH ]; then
 	BUILD_ARCH=x86_64
 fi
 
 BUILD_OS_LOWER=`echo $BUILD_OS | tr '[:upper:]' '[:lower:]'`
+BUILD_OS_NAME_LOWER=`echo $BUILD_OS_NAME | tr '[:upper:]' '[:lower:]'`
 BUILD_TYPE_LOWER=`echo $BUILD_TYPE | tr '[:upper:]' '[:lower:]'`
 # Assume we're running from the 'scripts' directory
 SCRIPTS_DIRECTORY=`dirname $(readlink -f $0)`
 mkdir -p $SCRIPTS_DIRECTORY/../resources
+if [ -z "$ISO" ]; then
+	ISO="$SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER.iso"
+	if [ ! -e "$ISO" ]; then
+	    pushd $SCRIPTS_DIRECTORY/../resources
+	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER.iso"
+	    popd
+	fi
+fi
 
 ##############################
 # Kickstart Configuration
@@ -65,7 +90,6 @@ PATCHED_KICKSTART=`mktemp`
 # ISO Configuration
 ##############################
 ISO_MOUNT_POINT=/mnt/iso
-TEMP_ISO=$SCRIPTS_DIRECTORY/../resources/CentOS-6.6-$BUILD_ARCH-netinstall.iso
 OUTPUT_ISO=$BUILD-$BUILD_VERSION-$BUILD_TYPE-$BUILD_ARCH-$BUILD_ID.iso
 OUTPUT_MD5=$OUTPUT_ISO.md5
 LOGO_FILE=$SCRIPTS_DIRECTORY/../images/$BUILD-Splash-$BUILD_VERSION.gif
@@ -109,9 +133,9 @@ if [ $? != 0 ]; then
 fi
 
 echo "Mounting ISO file."
-mount -t iso9660 -o loop $TEMP_ISO $ISO_MOUNT_POINT
+mount -t iso9660 -o loop $ISO $ISO_MOUNT_POINT
 if [ $? != 0 ]; then
-	echo "Couldn't mount $TEMP_ISO at $ISO_MOUNT_POINT."
+	echo "Couldn't mount $ISO at $ISO_MOUNT_POINT."
 	exit -1
 fi
 

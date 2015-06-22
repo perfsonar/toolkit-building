@@ -65,20 +65,23 @@ if [ "$BUILD_ARCH" != "$ARCH" -a -z "$CHROOT" -a -z "$BUILD_CHROOT" ]; then
     echo "You need to build the DVD on a host with the same architecture (i386 or x86-64) as the DVD itself, or to specify a 'chroot' jail"
     exit -1
 fi
-if [ -z $ISO ]; then
-	echo "No ISO file specified, exiting..."
-	exit 1
-fi
+
+####################################
+# Configuration that often changes
+####################################
+BUILD_VERSION="3.4.2" #perfSONAR version
+BUILD_OS_VERSION="6.6" #CentOS version
 
 ##############################
 # Build Configuration
 ##############################
+ISO_DOWNLOAD_SERVER="linux.mirrors.es.net"
 BUILD="perfSONAR Toolkit"
 BUILD_SHORT="pS-Toolkit"
 BUILD_DATE=`date "+%Y-%m-%d"`
-BUILD_VERSION="3.4.2"
 BUILD_ID=`date +"%Y%b%d"`
 BUILD_OS="CentOS6"
+BUILD_OS_NAME="CentOS"
 BUILD_ISO_LABEL="pS-Performance_Toolkit"
 BUILD_TYPE=FullInstall
 if [ -z $BUILD_ARCH ]; then
@@ -86,10 +89,19 @@ if [ -z $BUILD_ARCH ]; then
 fi
 
 BUILD_OS_LOWER=`echo $BUILD_OS | tr '[:upper:]' '[:lower:]'`
+BUILD_OS_NAME_LOWER=`echo $BUILD_OS_NAME | tr '[:upper:]' '[:lower:]'`
 BUILD_TYPE_LOWER=`echo $BUILD_TYPE | tr '[:upper:]' '[:lower:]'`
 # Assume we're running from the 'scripts' directory
 SCRIPTS_DIRECTORY=`dirname $(readlink -f $0)`
 mkdir -p $SCRIPTS_DIRECTORY/../resources
+if [ -z "$ISO" ]; then
+	ISO="$SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal.iso"
+	if [ ! -e "$ISO" ]; then
+	    pushd $SCRIPTS_DIRECTORY/../resources
+	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal.iso"
+	    popd
+	fi
+fi
 
 ##############################
 # Kickstart Configuration
