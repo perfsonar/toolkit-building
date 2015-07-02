@@ -46,7 +46,7 @@ done
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="3.5a1" #perfSONAR version
+BUILD_VERSION="3.5rc1" #perfSONAR version
 BUILD_OS_VERSION="6.6" #CentOS version
 
 ##############################
