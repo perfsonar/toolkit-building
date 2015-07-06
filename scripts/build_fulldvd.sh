@@ -82,7 +82,7 @@ BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_ID=`date +"%Y%b%d"`
 BUILD_OS="CentOS6"
 BUILD_OS_NAME="CentOS"
-BUILD_ISO_LABEL="pS-Performance_Toolkit"
+BUILD_ISO_LABEL="pS-Toolkit"
 BUILD_TYPE=FullInstall
 if [ -z $BUILD_ARCH ]; then
 	BUILD_ARCH=x86_64
@@ -217,7 +217,7 @@ popd
 ######################################################
 echo "Updating isolinux configuration."
 cat > $TEMP_NEW_ISO_MNT/isolinux/boot.msg <<EOF
-pS Performance Toolkit    Integrated by ESnet and Internet2  Build Date:
+perfSONAR Toolkit    Integrated by the perfSONAR Team  Build Date:
 http://www.perfsonar.net/  Hit enter to continue    $BUILD_DATE
 EOF
 

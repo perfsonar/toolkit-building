@@ -53,7 +53,7 @@ BUILD_OS_VERSION="6.6" #CentOS version
 # Build Configuration
 ##############################
 ISO_DOWNLOAD_SERVER="linux.mirrors.es.net"
-BUILD=pS-Performance_Toolkit
+BUILD=pS-Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_ID=`date +"%Y%b%d"`
@@ -171,7 +171,7 @@ popd
 echo "Updating isolinux configuration."
 cat > $TEMP_DIRECTORY/isolinux/boot.msg <<EOF
 17splash.lss
-pS Performance Toolkit    Integrated by ESnet and Internet2  Build Date:
+perfSONAR Toolkit    Integrated by the perfSONAR Team  Build Date:
 http://www.perfsonar.net  Hit enter to continue    $BUILD_DATE
 EOF
 
