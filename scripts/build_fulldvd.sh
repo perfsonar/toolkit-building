@@ -69,8 +69,8 @@ fi
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="3.5rc1" #perfSONAR version
-BUILD_OS_VERSION="6.6" #CentOS version
+BUILD_VERSION="3.5rc2" #perfSONAR version
+BUILD_OS_VERSION="6.7" #CentOS version
 
 ##############################
 # Build Configuration
