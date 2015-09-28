@@ -46,8 +46,8 @@ done
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="3.4.2" #perfSONAR version
-BUILD_OS_VERSION="6.6" #CentOS version
+BUILD_VERSION="3.5" #perfSONAR version
+BUILD_OS_VERSION="6.7" #CentOS version
 
 ##############################
 # Build Configuration
