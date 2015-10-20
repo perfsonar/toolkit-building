@@ -284,7 +284,7 @@ fi
 # Make sure ISO can run on USB sticks
 ########################################
 echo "Running isohbyrid on ISO."
-isohybrid $ISO
+isohybrid $NEW_ISO
 
 ########################################
 # Generate MD5
