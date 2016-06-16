@@ -50,6 +50,24 @@ while [ $# -gt 0 ]; do
 			shift
 			shift
 			;;
+	--os-version)
+			BUILD_OS_VERSION=$2
+			if [ -z $BUILD_OS_VERSION ]; then
+				echo "No OS version specified, exiting..."
+				exit 1
+			fi
+			shift
+			shift
+			;;
+	--ps-version)
+			BUILD_VERSION=$2
+			if [ -z $BUILD_VERSION ]; then
+				echo "No PS version specified, exiting..."
+				exit 1
+			fi
+			shift
+			shift
+			;;
 	-*)
 			echo "Invalid arg: $1"
 			exit 1
@@ -69,8 +87,9 @@ fi
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="3.5.1" #perfSONAR version
-BUILD_OS_VERSION="6.7" #CentOS version
+BUILD_VERSION="${BUILD_VERSION:-3.5.1}" #perfSONAR version
+BUILD_OS_VERSION="${BUILD_OS_VERSION:-6.8}" #CentOS version
+BUILD_OS_VERSION_MAJOR=${BUILD_OS_VERSION%.*}
 
 ##############################
 # Build Configuration
@@ -80,7 +99,7 @@ BUILD="perfSONAR Toolkit"
 BUILD_SHORT="pS-Toolkit"
 BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_ID=`date +"%Y%b%d"`
-BUILD_OS="CentOS6"
+BUILD_OS="CentOS$BUILD_OS_VERSION_MAJOR"
 BUILD_OS_NAME="CentOS"
 BUILD_ISO_LABEL="pS-Toolkit"
 BUILD_TYPE=FullInstall
@@ -95,12 +114,14 @@ BUILD_TYPE_LOWER=`echo $BUILD_TYPE | tr '[:upper:]' '[:lower:]'`
 SCRIPTS_DIRECTORY=`dirname $(readlink -f $0)`
 mkdir -p $SCRIPTS_DIRECTORY/../resources
 if [ -z "$ISO" ]; then
-	ISO="$SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal.iso"
+	ISO=$(ls $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-Minimal*.iso $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal*.iso 2>/dev/null)
 	if [ ! -e "$ISO" ]; then
 	    pushd $SCRIPTS_DIRECTORY/../resources
-	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal.iso"
+	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/" \
+	        -r -np -nd -erobots=off -A "*Minimal*.iso" -A "*minimal*.iso"
 	    popd
 	fi
+	ISO=$(ls $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-Minimal*.iso $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-minimal*.iso 2>/dev/null)
 fi
 
 ##############################
@@ -133,7 +154,7 @@ if [ "$BUILD_CHROOT" == "1" ]; then
     if [ -z "$CHROOT" ]; then
         CHROOT=`mktemp -d`
     fi
-    $SCRIPTS_DIRECTORY/build_chroot.sh $CHROOT $BUILD_ARCH
+    $SCRIPTS_DIRECTORY/build_chroot.sh $CHROOT $BUILD_ARCH $BUILD_OS_VERSION_MAJOR
 fi
 
 if [ -z "$CHROOT" ]; then
@@ -175,11 +196,10 @@ if [ "$DL_ARCH_LIST" == i386 ]; then
     DL_ARCH_LIST="i386,i686"
 fi
 cat $PKG_LIST_FILE | uniq | xargs -r setarch $BUILD_ARCH yumdownloader --installroot=$CHROOT --resolve --archlist=$DL_ARCH_LIST
-rm $PKG_LIST_FILE
 if [ "$BUILD_ARCH" == "x86_64" ]; then
     # There is a bug in yumdownloader where it downloads both x86_64 and i686. 
     # Clean out those i686 rpms to save space on iso
-    rm *.i686.rpm
+    rm -f *.i686.rpm
 fi
 rm $PKG_LIST_FILE
 popd
@@ -190,12 +210,15 @@ popd
 #Update repodata
 pushd $TEMP_NEW_ISO_MNT
 DISCINFO=`head -1 .discinfo`
-COMPDATA=`find repodata -name *${BUILD_ARCH}.xml`
+COMPDATA=`find repodata -name *-minimal-${BUILD_ARCH}*.xml`
 ##
 # Hackiest two lines of entire script follow. Force groups file to download then copy it
-setarch $BUILD_ARCH yum --installroot=$CHROOT groupinfo base > /dev/null
-cp $CHROOT/var/cache/yum/${BUILD_ARCH}/6/base/gen/groups.xml $COMPDATA
-createrepo -u "media://$DISCINFO" -g $COMPDATA .
+#setarch $BUILD_ARCH yum --installroot=$CHROOT groupinfo base > /dev/null
+rm -f repodata/*
+setarch $BUILD_ARCH yum --installroot=$CHROOT groupinfo base
+cp $CHROOT/var/cache/yum/${BUILD_ARCH}/${BUILD_OS_VERSION_MAJOR}/base/gen/*.xml $COMPDATA
+#createrepo -u "media://$DISCINFO" -g $COMPDATA .
+createrepo -g $COMPDATA .
 popd
 
 ########################################
@@ -205,11 +228,16 @@ cp $PATCHED_KICKSTART $TEMP_NEW_ISO_MNT/ks.cfg
 mv $PATCHED_KICKSTART $TEMP_NEW_ISO_MNT/isolinux/ks.cfg
 
 pushd $TEMP_NEW_ISO_MNT/isolinux
+if file initrd.img | grep -q LZMA; then
+    XZ_OPTS="--format=lzma"
+else
+    XZ_OPTS="--format=xz --check=crc32"
+fi
 mv initrd.img initrd.img.xz
-xz --format=lzma initrd.img.xz --decompress
+xz $XZ_OPTS initrd.img.xz --decompress
 echo ks.cfg | cpio -c -o -A -F initrd.img
-xz --format=lzma initrd.img
-mv initrd.img.lzma initrd.img
+xz $XZ_OPTS initrd.img --compress --stdout > initrd.img.xz
+mv initrd.img.xz initrd.img
 popd
 
 ######################################################
@@ -264,7 +292,7 @@ EOF
 ########################################
 # Make New ISO
 ########################################
-NEW_ISO="$SCRIPTS_DIRECTORY/../resources/${BUILD_ISO_LABEL}-${BUILD_VERSION}-${BUILD_TYPE}-${BUILD_ARCH}-${BUILD_ID}.iso"
+NEW_ISO="$SCRIPTS_DIRECTORY/../resources/${BUILD_ISO_LABEL}-${BUILD_VERSION}-${BUILD_OS}-${BUILD_TYPE}-${BUILD_ARCH}-${BUILD_ID}.iso"
 mkisofs -r -R -J -T -v -no-emul-boot -joliet-long -boot-load-size 4 -boot-info-table -input-charset UTF-8 -V "$BUILD_SHORT" -p "$0" -A "$BUILD" -b isolinux/isolinux.bin -c isolinux/boot.cat -x “lost+found” -o $NEW_ISO $TEMP_NEW_ISO_MNT
 rm -rf $TEMP_NEW_ISO_MNT
 
