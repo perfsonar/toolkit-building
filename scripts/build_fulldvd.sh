@@ -249,45 +249,9 @@ perfSONAR Toolkit    Integrated by the perfSONAR Team  Build Date:
 http://www.perfsonar.net/  Hit enter to continue    $BUILD_DATE
 EOF
 
-cat > $TEMP_NEW_ISO_MNT/isolinux/isolinux.cfg <<EOF
-default vesamenu.c32
-#prompt 1
-timeout 600
-
-display boot.msg
-
-menu background splash.jpg
-menu title Welcome to perfSONAR Toolkit $BUILD_VERSION!
-menu color border 0 #ffffffff #00000000
-menu color sel 7 #ffffffff #ff000000
-menu color title 0 #ffffffff #00000000
-menu color tabmsg 0 #ffffffff #00000000
-menu color unsel 0 #ffffffff #00000000
-menu color hotsel 0 #ff000000 #ffffffff
-menu color hotkey 7 #ffffffff #ff000000
-menu color scrollbar 0 #ffffffff #00000000
-
-label linux
-  menu label ^Install the perfSONAR Toolkit
-  menu default
-  kernel vmlinuz
-  append initrd=initrd.img ks=file:///ks.cfg
-label vesa
-  menu label Install the perfSONAR Toolkit in text mode
-  kernel vmlinuz
-  append initrd=initrd.img text xdriver=vesa nomodeset ks=file:///ks.cfg
-label rescue
-  menu label ^Rescue installed system
-  kernel vmlinuz
-  append initrd=initrd.img rescue
-label local
-  menu label Boot from ^local drive
-  localboot 0xffff
-label memtest86
-  menu label ^Memory test
-  kernel memtest
-  append -
-EOF
+sed -e "s/\[BUILD_VERSION\]/$BUILD_VERSION/" \
+    -e "s/\[KS_FILE\]/ks.cfg/" \
+    isolinux/centos$BUILD_OS_VERSION_MAJOR.cfg > $TEMP_NEW_ISO_MNT/isolinux/isolinux.cfg
 
 ########################################
 # Make New ISO
