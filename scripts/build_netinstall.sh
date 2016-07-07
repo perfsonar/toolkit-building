@@ -140,7 +140,9 @@ if [ $NUM_LOOPS -gt $MAX_LOOPS ]; then
 	echo "Couldn't find enough unused loop devices."
 	exit -1
 fi
-/sbin/MAKEDEV -m $NUM_LOOPS loop
+if [ -x /sbin/MAKEDEV ]; then
+	/sbin/MAKEDEV -m $NUM_LOOPS loop
+fi
 
 ##############################
 # Create Mount Point and Mount ISO
