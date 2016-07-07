@@ -297,6 +297,12 @@ mkisofs -r -R -J -T -v -no-emul-boot -joliet-long -boot-load-size 4 -boot-info-t
 rm -rf $TEMP_NEW_ISO_MNT
 
 ########################################
+# Make sure ISO can run on USB sticks
+########################################
+echo "Running isohbyrid on ISO."
+isohybrid $NEW_ISO
+
+########################################
 # Implant md5 in ISO
 ########################################
 echo "Implanting MD5 in ISO."
@@ -307,12 +313,6 @@ elif [ -a /usr/lib/anaconda-runtime/implantisomd5 ]; then
 else
     echo "Package isomd5 not installed."
 fi
-
-########################################
-# Make sure ISO can run on USB sticks
-########################################
-echo "Running isohbyrid on ISO."
-isohybrid $NEW_ISO
 
 ########################################
 # Generate MD5

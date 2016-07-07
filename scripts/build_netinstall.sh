@@ -258,6 +258,9 @@ if [ $? != 0 ]; then
 	exit -1
 fi
 
+# Make sure the ISO can boot on USB sticks
+isohybrid $OUTPUT_ISO
+
 echo "Implanting MD5 in ISO."
 if [ -a /usr/bin/implantisomd5 ]; then
     /usr/bin/implantisomd5 $OUTPUT_ISO
@@ -266,9 +269,6 @@ elif [ -a /usr/lib/anaconda-runtime/implantisomd5 ]; then
 else
     echo "Package isomd5 not installed."
 fi
-
-# Make sure the ISO can boot on USB sticks
-isohybrid $OUTPUT_ISO
 
 echo "Generating new MD5: $OUTPUT_MD5."
 md5sum $OUTPUT_ISO > $OUTPUT_MD5
