@@ -11,7 +11,7 @@ fi
 ##############################
 while [ $# -gt 0 ]; do
     case $1 in
-        --arch)
+		--arch)
 			BUILD_ARCH=$2
 			if [ -z $BUILD_ARCH ]; then
 				echo "No architecture specified, exiting..."
@@ -33,11 +33,29 @@ while [ $# -gt 0 ]; do
 			shift
 			shift
 			;;
+		--os-version)
+			BUILD_OS_VERSION=$2
+			if [ -z $BUILD_OS_VERSION ]; then
+				echo "No OS version specified, exiting..."
+				exit 1
+			fi
+			shift
+			shift
+			;;
+		--ps-version)
+			BUILD_VERSION=$2
+			if [ -z $BUILD_VERSION ]; then
+				echo "No PS version specified, exiting..."
+				exit 1
+			fi
+			shift
+			shift
+			;;
 		-*)
 			echo "Invalid arg: $1"
 			exit 1
 			;;
-        *)
+		*)
 			break
 			;;
     esac
@@ -46,8 +64,9 @@ done
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="3.5.1" #perfSONAR version
-BUILD_OS_VERSION="6.7" #CentOS version
+BUILD_VERSION="${BUILD_VERSION:-3.5.1}" #perfSONAR version
+BUILD_OS_VERSION="${BUILD_OS_VERSION:-6.8}" #CentOS version
+BUILD_OS_VERSION_MAJOR=${BUILD_OS_VERSION%.*}
 
 ##############################
 # Build Configuration
@@ -57,7 +76,7 @@ BUILD=pS-Toolkit
 BUILD_SHORT=pS-Toolkit
 BUILD_DATE=`date "+%Y-%m-%d"`
 BUILD_ID=`date +"%Y%b%d"`
-BUILD_OS="CentOS6"
+BUILD_OS="CentOS$BUILD_OS_VERSION_MAJOR"
 BUILD_OS_NAME="CentOS"
 BUILD_TYPE=NetInstall
 if [ -z $BUILD_ARCH ]; then
@@ -71,12 +90,14 @@ BUILD_TYPE_LOWER=`echo $BUILD_TYPE | tr '[:upper:]' '[:lower:]'`
 SCRIPTS_DIRECTORY=`dirname $(readlink -f $0)`
 mkdir -p $SCRIPTS_DIRECTORY/../resources
 if [ -z "$ISO" ]; then
-	ISO="$SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER.iso"
+	ISO=$(ls $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE*.iso $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER*.iso 2>/dev/null)
 	if [ ! -e "$ISO" ]; then
 	    pushd $SCRIPTS_DIRECTORY/../resources
-	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER.iso"
+	    wget "http://$ISO_DOWNLOAD_SERVER/$BUILD_OS_NAME_LOWER/$BUILD_OS_VERSION/isos/$BUILD_ARCH/" \
+	        -r -np -nd -erobots=off -A "*$BUILD_TYPE*.iso" -A "*$BUILD_TYPE_LOWER*.iso"
 	    popd
 	fi
+	ISO=$(ls $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE*.iso $SCRIPTS_DIRECTORY/../resources/$BUILD_OS_NAME-$BUILD_OS_VERSION-$BUILD_ARCH-$BUILD_TYPE_LOWER*.iso 2>/dev/null)
 fi
 
 ##############################
@@ -90,7 +111,7 @@ PATCHED_KICKSTART=`mktemp`
 # ISO Configuration
 ##############################
 ISO_MOUNT_POINT=/mnt/iso
-OUTPUT_ISO=$BUILD-$BUILD_VERSION-$BUILD_TYPE-$BUILD_ARCH-$BUILD_ID.iso
+OUTPUT_ISO=$BUILD-$BUILD_VERSION-$BUILD_OS-$BUILD_TYPE-$BUILD_ARCH-$BUILD_ID.iso
 OUTPUT_MD5=$OUTPUT_ISO.md5
 LOGO_FILE=$SCRIPTS_DIRECTORY/../images/$BUILD-Splash-$BUILD_VERSION.gif
 
@@ -119,7 +140,9 @@ if [ $NUM_LOOPS -gt $MAX_LOOPS ]; then
 	echo "Couldn't find enough unused loop devices."
 	exit -1
 fi
-/sbin/MAKEDEV -m $NUM_LOOPS loop
+if [ -x /sbin/MAKEDEV ]; then
+	/sbin/MAKEDEV -m $NUM_LOOPS loop
+fi
 
 ##############################
 # Create Mount Point and Mount ISO
@@ -157,11 +180,16 @@ mv $PATCHED_KICKSTART $TEMP_DIRECTORY/isolinux/$BUILD_OS_LOWER-$BUILD_TYPE_LOWER
 
 echo "Placing kickstart into initrd.img"
 pushd $TEMP_DIRECTORY/isolinux
+if file initrd.img | grep -q LZMA; then
+    XZ_OPTS="--format=lzma"
+else
+    XZ_OPTS="--format=xz --check=crc32"
+fi
 mv initrd.img initrd.img.xz
-xz --format=lzma initrd.img.xz --decompress
+xz $XZ_OPTS initrd.img.xz --decompress
 echo $BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg | cpio -c -o -A -F initrd.img
-xz --format=lzma initrd.img
-mv initrd.img.lzma initrd.img
+xz $XZ_OPTS initrd.img --compress --stdout > initrd.img.xz
+mv initrd.img.xz initrd.img
 rm $BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
 popd
 
@@ -175,50 +203,16 @@ perfSONAR Toolkit    Integrated by the perfSONAR Team  Build Date:
 http://www.perfsonar.net  Hit enter to continue    $BUILD_DATE
 EOF
 
-cat > $TEMP_DIRECTORY/isolinux/isolinux.cfg <<EOF
-default vesamenu.c32
-#prompt 1
-timeout 600
+sed -e "s/\\[BUILD_VERSION\\]/$BUILD_VERSION/" \
+    -e "s/\\[KS_FILE\\]/$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg/" \
+    $SCRIPTS_DIRECTORY/../isolinux/centos$BUILD_OS_VERSION_MAJOR.cfg > $TEMP_DIRECTORY/isolinux/isolinux.cfg
 
-display boot.msg
-
-menu background splash.jpg
-menu title Welcome to perfSONAR Toolkit $BUILD_VERSION!
-menu color border 0 #ffffffff #00000000
-menu color sel 7 #ffffffff #ff000000
-menu color title 0 #ffffffff #00000000
-menu color tabmsg 0 #ffffffff #00000000
-menu color unsel 0 #ffffffff #00000000
-menu color hotsel 0 #ff000000 #ffffffff
-menu color hotkey 7 #ffffffff #ff000000
-menu color scrollbar 0 #ffffffff #00000000
-
-label linux
-  menu label ^Install the perfSONAR Toolkit
-  menu default
-  kernel vmlinuz
-  append initrd=initrd.img ks=file:///$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
-label vesa
-  menu label Install the perfSONAR Toolkit in text mode
-  kernel vmlinuz
-  append initrd=initrd.img text xdriver=vesa nomodeset ks=file:///$BUILD_OS_LOWER-$BUILD_TYPE_LOWER.cfg
-label rescue
-  menu label ^Rescue installed system
-  kernel vmlinuz
-  append initrd=initrd.img rescue
-label local
-  menu label Boot from ^local drive
-  localboot 0xffff
-label memtest86
-  menu label ^Memory test
-  kernel memtest
-  append -
-EOF
-
-echo "Building boot logo file."
-convert $LOGO_FILE ppm:- | ppmtolss16 '#FFFFFF=7' > $TEMP_DIRECTORY/isolinux/splash.lss
-convert -depth 16 -colors 65536 $LOGO_FILE $TEMP_DIRECTORY/isolinux/splash.png
-mv $TEMP_DIRECTORY/isolinux/splash.png $TEMP_DIRECTORY/isolinux/splash.jpg
+if [ -f $LOGO_FILE ]; then
+	echo "Building boot logo file."
+	convert $LOGO_FILE ppm:- | ppmtolss16 '#FFFFFF=7' > $TEMP_DIRECTORY/isolinux/splash.lss
+	convert -depth 16 -colors 65536 $LOGO_FILE $TEMP_DIRECTORY/isolinux/splash.png
+	mv $TEMP_DIRECTORY/isolinux/splash.png $TEMP_DIRECTORY/isolinux/splash.jpg
+fi
 
 ##############################
 # Create new ISO and MD5 and Cleanup
@@ -230,6 +224,9 @@ if [ $? != 0 ]; then
 	exit -1
 fi
 
+# Make sure the ISO can boot on USB sticks
+isohybrid $OUTPUT_ISO
+
 echo "Implanting MD5 in ISO."
 if [ -a /usr/bin/implantisomd5 ]; then
     /usr/bin/implantisomd5 $OUTPUT_ISO
@@ -238,9 +235,6 @@ elif [ -a /usr/lib/anaconda-runtime/implantisomd5 ]; then
 else
     echo "Package isomd5 not installed."
 fi
-
-# Make sure the ISO can boot on USB sticks
-isohybrid $OUTPUT_ISO
 
 echo "Generating new MD5: $OUTPUT_MD5."
 md5sum $OUTPUT_ISO > $OUTPUT_MD5
