@@ -31,6 +31,7 @@ if [ -z "$EPEL_RELEASE_RPM" ]; then
     EPEL_RELEASE_RPM=$(wget -q -O- $EPEL_REPO | grep -o -P "epel-release-.*?rpm" | head -1)
 fi
 I2_RPM=$(wget -q -O- $I2_REPO | grep -o -P "Internet2-repo-.*?rpm" | head -1)
+I2_STAGING_RPM=$(wget -q -O- $I2_REPO | grep -o -P "Internet2-repo-staging.*?rpm" | head -1)
 
 mkdir -p $CHROOT_DIR
 mkdir -p $CHROOT_DIR/var/lib/rpm
@@ -45,7 +46,7 @@ for gpg_key in $CHROOT_DIR/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-*$OS_VERSION; do
 done
 
 setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y rpm-build yum anaconda anaconda-runtime createrepo mkisofs
-setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y "$EPEL_REPO/$EPEL_RELEASE_RPM" "$I2_REPO/$I2_RPM"
+setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y "$EPEL_REPO/$EPEL_RELEASE_RPM" "$I2_REPO/$I2_RPM" "$I2_REPO/$I2_STAGING_RPM"
 
 #make sure web100 is available
 if [ "$OS_VERSION" -lt 7 ]; then
