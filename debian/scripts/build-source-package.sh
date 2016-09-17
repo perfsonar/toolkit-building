@@ -9,10 +9,13 @@
 #   tag: the git tag to build from (ex: 4.0-2.rc1-1)
 #   branch: the git branch to build from (ex: debian/jessie)
 
-# 
+# Configuration
+SRC_DIR='source'
+GIT_BUILDING_REPO='toolkit-building'
+
 # Trick to enable the Git parameter plugin to work with the source directory where we checked out
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
-ln -s source/.git* .
+ln -s ${SRC_DIR}/.git* .
 
 # Check the tag parameter
 if [ -z $tag ]; then
@@ -25,7 +28,7 @@ else
 fi
 
 # In the checked out source directory we use the DEBIAN_BRANCH
-cd source
+cd ${SRC_DIR}
 git checkout ${DEBIAN_BRANCH}
 
 # Get upstream branch from gbp.conf and check it out so we can merge it later on
@@ -57,9 +60,12 @@ else
     git-buildpackage $GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}
 fi
 
-# Build the source package
+# Build the source package, but we remove ourselves first
+rm -rf ${GIT_BUILDING_REPO}
 dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
 
-# Create lintian report
+# Create lintian report in junit format, if jenkins-debian-glue is installed
 cd ..
-/usr/bin/lintian-junit-report *.dsc > lintian.xml
+if [ -x /usr/bin/lintian-junit-report ]
+    /usr/bin/lintian-junit-report *.dsc > lintian.xml
+fi
