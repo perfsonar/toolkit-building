@@ -66,6 +66,6 @@ dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
 
 # Create lintian report in junit format, if jenkins-debian-glue is installed
 cd ..
-if [ -x /usr/bin/lintian-junit-report ]
+if [ -x /usr/bin/lintian-junit-report ]; then
     /usr/bin/lintian-junit-report *.dsc > lintian.xml
 fi
