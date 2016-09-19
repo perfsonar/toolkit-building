@@ -33,18 +33,18 @@ git checkout ${DEBIAN_BRANCH}
 
 # Get upstream branch from gbp.conf and check it out so we can merge it later on
 UPSTREAM_BRANCH=`awk '/^upstream-branch/ {print $3}' debian/gbp.conf`
-PKG=`awk 'NR==1 {print $1}' ${SRC_DIR}/debian/changelog`
+PKG=`awk 'NR==1 {print $1}' debian/changelog`
 git checkout ${UPSTREAM_BRANCH}
 git checkout ${DEBIAN_BRANCH}
 if [ -z $DEBIAN_TAG ]; then
-    echo -e "Building \033[1;32m${PKG}\033[0;37m from \033[1m${DEBIAN_BRANCH}\033[0m.\n"
+    echo "Building ${PKG} from ${DEBIAN_BRANCH}.\n"
 else
-    echo -e "Building \033[1;32m${PKG}\033[0;37m from \033[1m${DEBIAN_TAG}\033[0m.\n"
+    echo "Building ${PKG} from ${DEBIAN_TAG}.\n"
 fi
 
 # default gbp options
 GBP_OPTS="-nc --git-force-create --git-ignore-new --git-ignore-branch -S -us -uc --git-verbose --git-builder=/bin/true --git-cleaner=/bin/true --git-export-dir="
-if [ ${PKG} = "maddash" ]; then
+if [ "${PKG}" = "maddash" ]; then
     GBP_OPTS=$GBP_OPTS" --git-submodules"
 fi
 
