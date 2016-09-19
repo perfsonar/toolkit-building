@@ -18,10 +18,10 @@ GIT_BUILDING_REPO='toolkit-building'
 ln -s ${SRC_DIR}/.git* .
 
 # Check the tag parameter
-if [ -z $tag ]; then
+DEBIAN_TAG=$tag
+if [ -z $DEBIAN_TAG ]; then
     # If we don't have a tag, we use the branch parameter
     DEBIAN_BRANCH=${branch#refs/remotes/origin/}
-    DEBIAN_TAG=$tag
 else
     # If we have a tag we take the branch name from it
     DEBIAN_BRANCH=${tag%\/*}
@@ -33,11 +33,20 @@ git checkout ${DEBIAN_BRANCH}
 
 # Get upstream branch from gbp.conf and check it out so we can merge it later on
 UPSTREAM_BRANCH=`awk '/^upstream-branch/ {print $3}' debian/gbp.conf`
+PKG=`awk 'NR==1 {print $1}' ${SRC_DIR}/debian/changelog`
 git checkout ${UPSTREAM_BRANCH}
 git checkout ${DEBIAN_BRANCH}
+if [ -z $DEBIAN_TAG ]; then
+    echo -e "Building \033[1;32m${PKG}\033[0;37m from \033[1m${DEBIAN_BRANCH}\033[0m.\n"
+else
+    echo -e "Building \033[1;32m${PKG}\033[0;37m from \033[1m${DEBIAN_TAG}\033[0m.\n"
+fi
 
 # default gbp options
 GBP_OPTS="-nc --git-force-create --git-ignore-new --git-ignore-branch -S -us -uc --git-verbose --git-builder=/bin/true --git-cleaner=/bin/true --git-export-dir="
+if [ ${PKG} = "maddash" ]; then
+    GBP_OPTS=$GBP_OPTS" --git-submodules"
+fi
 
 # We build the upstream sources (tarball) from git with git-buildpackage
 if [ -z $DEBIAN_TAG ]; then
@@ -49,7 +58,7 @@ if [ -z $DEBIAN_TAG ]; then
     gbp dch -S --ignore-branch -a
     timestamp=`date +%Y%m%d%H%M%S`
     sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
-    git-buildpackage $GBP_OPTS --git-upstream-tree=branch
+    git-buildpackage $GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}
 else
     # If we have a tag, we take the source from the git tag, this will be a release build
     MY_GBP_OPTS="--git-upstream-tree=tag"
