@@ -11,6 +11,7 @@
 
 # Configuration
 SRC_DIR='source'
+GIT_BUILDING_REPO='toolkit-building'
 
 # Trick to enable the Git parameter plugin to work with the source directory where we checked out
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
@@ -55,35 +56,40 @@ fi
 # We package the upstream sources (tarball) from git with git-buildpackage
 if [ -z $DEBIAN_TAG ]; then
     # If we don't have a tag, we take the source from the debian/branch and merge upstream in it so we have the latest changes
-    echo "Building snapshot package of ${PKG} from ${DEBIAN_BRANCH}.\n"
+    echo "\nBuilding snapshot package of ${PKG} from ${DEBIAN_BRANCH}.\n"
     git merge ${UPSTREAM_BRANCH}
-    # We set the author of the Debian Changelog, only for snapshot builds
+    # We set the author of the Debian Changelog, only for snapshot builds (this doesn't seem to be used by gbp dch :(
     export DEBEMAIL="perfsonar-debian Autobuilder <debian@perfsonar.net>"
+    # We can ignore NMU related warnings from LINTIAN as this package is not to be posted to official Debian repo
+    LINTIAN_ARGS="--suppress-tags changelog-should-mention-nmu,source-nmu-has-incorrect-version-number"
     # And we generate the changelog ourselves, with a version number suitable for an upstream snapshot
     gbp dch -S --ignore-branch -a
     timestamp=`date +%Y%m%d%H%M%S`
     sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
     git-buildpackage $GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}
-    # We can ignore NMU related warnings from LINTIAN as this package is not to be posted to official Debian repo
-    LINTIAN_ARGS="--suppress-tags changelog-should-mention-nmu,source-nmu-has-incorrect-version-number"
 else
     # If we have a tag, we take the source from the git tag
-    echo "Building release package of ${PKG} from ${DEBIAN_TAG}.\n"
+    echo "\nBuilding release package of ${PKG} from ${DEBIAN_TAG}.\n"
     # We build the upstream tag from the Debian tag by, see https://github.com/perfsonar/project/wiki/Versioning :
     # - removing the leading debian/distro prefix
     # - removing the ending -1 debian-version field
     UPSTREAM_TAG=${tag##*\/}
     git-buildpackage $GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}
 fi
+[ $? -eq 0 ] || exit 1
+
+# Remove the GIT_BUILDING_REPO in case it re-emerged (with the --git-submodules option)
+git submodule deinit -f ${GIT_BUILDING_REPO}
 
 # Build the source package
 dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
+[ $? -eq 0 ] || exit 1
 
 # Run Lintian on built package
 cd ..
-lintian ${LINTIAN_ARGS} --show-overrides ${PKG}*.dsc
 # Create lintian report in junit format, if jenkins-debian-glue is installed
 if [ -x /usr/bin/lintian-junit-report ]; then
     /usr/bin/lintian-junit-report ${PKG}*.dsc > lintian.xml
 fi
+lintian ${LINTIAN_ARGS} --show-overrides ${PKG}*.dsc
 
