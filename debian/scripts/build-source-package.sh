@@ -12,6 +12,7 @@
 # Configuration
 SRC_DIR='source'
 GIT_BUILDING_REPO='toolkit-building'
+SHARED_LIB_REPO='shared'
 
 # Trick to enable the Git parameter plugin to work with the source directory where we checked out
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
@@ -71,10 +72,15 @@ fi
 
 # Build the source package, but we remove ourselves first
 rm -rf ${GIT_BUILDING_REPO}
+# And we also remove the shared lib repo that we don't want to include in the package
+# (because it is packaged as a separated libperfsonar package)
+rm -rf ${SHARED_LIB_REPO}
 dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
 
-# Create lintian report in junit format, if jenkins-debian-glue is installed
+# Run Lintian on built package
 cd ..
+lintian --show-overrides ${PKG}*.dsc
+# Create lintian report in junit format, if jenkins-debian-glue is installed
 if [ -x /usr/bin/lintian-junit-report ]; then
-    /usr/bin/lintian-junit-report *.dsc > lintian.xml
+    /usr/bin/lintian-junit-report ${PKG}*.dsc > lintian.xml
 fi
