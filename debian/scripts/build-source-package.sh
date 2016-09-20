@@ -1,9 +1,9 @@
 #!/bin/sh
-# This scripts builds a perfSONAR Debian source package from a git repository checkout
+# This script builds a perfSONAR Debian source package from a git repository checkout.
 # It uses git-buildpackage and its configuration for the package in debian/gbp.conf
 # It is made to work with Jenkins, for that purpose the git repository need to be checked out
-# in a sub-directory of the Jenkins workspace, per convention we call this sub-directory 'source'
-# The build artefacts will be at the root level of the workspace
+# in a sub-directory of the Jenkins workspace, per convention we call this sub-directory 'source'.
+# The resulting artefacts will be at the root level of the workspace.
 #
 # It also uses the following environment variables (or Jenkins parameters)
 #   tag: the git tag to build from (ex: 4.0-2.rc1-1)
@@ -11,47 +11,51 @@
 
 # Configuration
 SRC_DIR='source'
-GIT_BUILDING_REPO='toolkit-building'
-SHARED_LIB_REPO='shared'
 
 # Trick to enable the Git parameter plugin to work with the source directory where we checked out
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
+# This is a bug in the git-parameter plugin, see https://issues.jenkins-ci.org/browse/JENKINS-27726
 ln -s ${SRC_DIR}/.git* .
 
-# Check the tag parameter
+# We don't want to package any submodule
+cd ${SRC_DIR}
+git submodule deinit -f .
+
+# Check the tag parameter, it has precedence over the branch parameter
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
     # If we don't have a tag, we use the branch parameter
+    if [ -z $branch ]; then
+        echo "I don't know what to build, I need either a \$branch or a \$tag."
+        exit 1
+    fi
     DEBIAN_BRANCH=${branch#refs/remotes/origin/}
 else
-    # If we have a tag we take the branch name from it
-    DEBIAN_BRANCH=${tag%\/*}
+    # If we have a tag we check it out
+    DEBIAN_BRANCH=${tag}
 fi
-
-# In the checked out source directory we use the DEBIAN_BRANCH
-cd ${SRC_DIR}
+# Make sure we use the desired repository checkout
 git checkout ${DEBIAN_BRANCH}
 
-# Get upstream branch from gbp.conf and check it out so we can merge it later on
+# Get upstream branch from gbp.conf and making it a local branch so we can merge and build tarball from it
 UPSTREAM_BRANCH=`awk '/^upstream-branch/ {print $3}' debian/gbp.conf`
 PKG=`awk 'NR==1 {print $1}' debian/changelog`
-git checkout ${UPSTREAM_BRANCH}
-git checkout ${DEBIAN_BRANCH}
-if [ -z $DEBIAN_TAG ]; then
-    echo "Building ${PKG} from ${DEBIAN_BRANCH}.\n"
-else
-    echo "Building ${PKG} from ${DEBIAN_TAG}.\n"
-fi
+git branch ${UPSTREAM_BRANCH} origin/${UPSTREAM_BRANCH}
 
-# default gbp options
+# Our default gbp options
 GBP_OPTS="-nc --git-force-create --git-ignore-new --git-ignore-branch -S -us -uc --git-verbose --git-builder=/bin/true --git-cleaner=/bin/true --git-export-dir="
+
+# Special repositories/packages needs
 if [ "${PKG}" = "maddash" ]; then
+    # MaDDash has a submodule we want to package!
     GBP_OPTS=$GBP_OPTS" --git-submodules"
+    git submodule update --init maddash-server/madalert
 fi
 
-# We build the upstream sources (tarball) from git with git-buildpackage
+# We package the upstream sources (tarball) from git with git-buildpackage
 if [ -z $DEBIAN_TAG ]; then
-    # If we don't have a tag, we take the source from the current debian/branch and merge upstream in it so we have the latest changes, this will be a snapshot build
+    # If we don't have a tag, we take the source from the debian/branch and merge upstream in it so we have the latest changes
+    echo "Building snapshot package of ${PKG} from ${DEBIAN_BRANCH}.\n"
     git merge ${UPSTREAM_BRANCH}
     # We set the author of the Debian Changelog, only for snapshot builds
     export DEBEMAIL="perfsonar-debian Autobuilder <debian@perfsonar.net>"
@@ -60,27 +64,26 @@ if [ -z $DEBIAN_TAG ]; then
     timestamp=`date +%Y%m%d%H%M%S`
     sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
     git-buildpackage $GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}
+    # We can ignore NMU related warnings from LINTIAN as this package is not to be posted to official Debian repo
+    LINTIAN_ARGS="--suppress-tags changelog-should-mention-nmu,source-nmu-has-incorrect-version-number"
 else
-    # If we have a tag, we take the source from the git tag, this will be a release build
-    MY_GBP_OPTS="--git-upstream-tree=tag"
-    # We build the upstream tag from the Debian tag by:
+    # If we have a tag, we take the source from the git tag
+    echo "Building release package of ${PKG} from ${DEBIAN_TAG}.\n"
+    # We build the upstream tag from the Debian tag by, see https://github.com/perfsonar/project/wiki/Versioning :
     # - removing the leading debian/distro prefix
     # - removing the ending -1 debian-version field
     UPSTREAM_TAG=${tag##*\/}
     git-buildpackage $GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}
 fi
 
-# Build the source package, but we remove ourselves first
-rm -rf ${GIT_BUILDING_REPO}
-# And we also remove the shared lib repo that we don't want to include in the package
-# (because it is packaged as a separated libperfsonar package)
-rm -rf ${SHARED_LIB_REPO}
+# Build the source package
 dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
 
 # Run Lintian on built package
 cd ..
-lintian --show-overrides ${PKG}*.dsc
+lintian ${LINTIAN_ARGS} --show-overrides ${PKG}*.dsc
 # Create lintian report in junit format, if jenkins-debian-glue is installed
 if [ -x /usr/bin/lintian-junit-report ]; then
     /usr/bin/lintian-junit-report ${PKG}*.dsc > lintian.xml
 fi
+
