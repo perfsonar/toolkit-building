@@ -25,21 +25,19 @@ git submodule deinit -f .
 # Check the tag parameter, it has precedence over the branch parameter
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
-    # If we don't have a tag, we look which branch we're on
-    DEBIAN_BRANCH=`git branch --list | awk '/^\* .*$/ {print $2}'`
+    # If we don't have a tag, we look which branch we're building from
+    DEBIAN_BRANCH=`awk -F '=' '/debian-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
     if [ ! "${DEBIAN_BRANCH%%\/*}" = "debian" ]; then
-        echo "This doesn't look like a Debian branch for me to build, I'll quit."
+        echo "This (${DEBIAN_BRANCH}) doesn't look like a Debian branch for me to build, I'll quit."
         exit 1
     fi
 else
     # If we have a tag we check it out
-    DEBIAN_BRANCH=${tag}
+    git checkout ${DEBIAN_TAG}
 fi
-# Make sure we use the desired repository checkout
-git checkout ${DEBIAN_BRANCH}
 
 # Get upstream branch from gbp.conf and making it a local branch so we can merge and build tarball from it
-UPSTREAM_BRANCH=`awk '/^upstream-branch/ {print $3}' debian/gbp.conf`
+UPSTREAM_BRANCH=`awk -F '=' '/upstream-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
 PKG=`awk 'NR==1 {print $1}' debian/changelog`
 git branch ${UPSTREAM_BRANCH} origin/${UPSTREAM_BRANCH}
 
@@ -73,7 +71,7 @@ else
     # We build the upstream tag from the Debian tag by, see https://github.com/perfsonar/project/wiki/Versioning :
     # - removing the leading debian/distro prefix
     # - removing the ending -1 debian-version field
-    UPSTREAM_TAG=${tag##*\/}
+    UPSTREAM_TAG=${DEBIAN_TAG##*\/}
     git-buildpackage $GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}
 fi
 [ $? -eq 0 ] || exit 1
