@@ -25,12 +25,12 @@ git submodule deinit -f .
 # Check the tag parameter, it has precedence over the branch parameter
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
-    # If we don't have a tag, we use the branch parameter
-    if [ -z $branch ]; then
-        echo "I don't know what to build, I need either a \$branch or a \$tag."
+    # If we don't have a tag, we look which branch we're on
+    DEBIAN_BRANCH=`git branch --list | awk '/^\* .*$/ {print $2}'`
+    if [ ! "${DEBIAN_BRANCH%%\/*}" = "debian" ]; then
+        echo "This doesn't look like a Debian branch for me to build, I'll quit."
         exit 1
     fi
-    DEBIAN_BRANCH=${branch#refs/remotes/origin/}
 else
     # If we have a tag we check it out
     DEBIAN_BRANCH=${tag}
