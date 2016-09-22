@@ -8,6 +8,8 @@
 # It also uses the following environment variables (or Jenkins parameters)
 #   tag: the git tag to build from (ex: 4.0-2.rc1-1)
 #   branch: the git branch to build from (ex: debian/jessie)
+# If none of these variables/parameters are set, then the script looks for the branch to build
+# in the debian/gbp.conf configuration file.
 
 # Configuration
 SRC_DIR='source'
@@ -25,8 +27,13 @@ git submodule deinit -f .
 # Check the tag parameter, it has precedence over the branch parameter
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
-    # If we don't have a tag, we look which branch we're building from
-    DEBIAN_BRANCH=`awk -F '=' '/debian-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
+    # If we don't have a tag parameter, let's look at the branch parameter
+    if [ $branch = '-' ]; then
+        # No tag and no branch parameter, we look which branch we're building from
+        DEBIAN_BRANCH=`awk -F '=' '/debian-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
+    else
+        DEBIAN_BRANCH=$branch
+    fi
     if [ ! "${DEBIAN_BRANCH%%\/*}" = "debian" ]; then
         echo "This (${DEBIAN_BRANCH}) doesn't look like a Debian branch for me to build, I'll quit."
         exit 1
