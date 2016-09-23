@@ -140,7 +140,7 @@ sed "1s/ UNRELEASED;/ $PS_DEB_REP;/" $TMP_FILE > debian/changelog
 /bin/rm $TMP_FILE
 git add debian/changelog
 # And perform the commit and the tagging
-git commit ${commit_a} ${commit_options} -m "Releasing ${PKG} (${PKG_REL})"
+git commit ${commit_a} ${commit_options} -m "Releasing ${PKG} (${PKG_VERSION})"
 git tag ${DEBIAN_TAG}
 
 echo
