@@ -24,6 +24,25 @@ ln -s ${SRC_DIR}/.git* .
 cd ${SRC_DIR}
 git submodule deinit -f .
 
+# Kludge detection
+if [ ! -f debian/gbp.conf ]; then
+    # No debian directory, we're probably building pscheduler
+    if [ -d "$package" ]; then
+        # It seems we're right, now, are we at the correct location?
+        cd ${package}
+        if ! [ -d debian ]; then
+            cd */debian
+            pscheduler_dir_level=".."
+        else
+            pscheduler_dir_level="."
+        fi
+        cd ${pscheduler_dir_level}
+    else
+        echo "I don't recognise what you want me to build.  I stop."
+        exit 1
+    fi
+fi
+
 # Check the tag parameter, it has precedence over the branch parameter
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
@@ -52,26 +71,36 @@ git branch ${UPSTREAM_BRANCH} origin/${UPSTREAM_BRANCH}
 GBP_OPTS="-nc --git-force-create --git-ignore-new --git-ignore-branch -S -us -uc --git-verbose --git-builder=/bin/true --git-cleaner=/bin/true --git-export-dir="
 
 # Special repositories/packages needs
-if [ "${PKG}" = "maddash" ]; then
-    # MaDDash has a submodule we want to package!
-    GBP_OPTS=$GBP_OPTS" --git-submodules"
-    git submodule update --init maddash-server/madalert
-fi
+case "${PKG}" in
+    "maddash")
+        # MaDDash has a submodule we want to package!
+        GBP_OPTS=$GBP_OPTS" --git-submodules"
+        git submodule update --init maddash-server/madalert
+        ;;
+esac
 
-# We package the upstream sources (tarball) from git with git-buildpackage
+# We differentiate snapshot and release builds
 if [ -z $DEBIAN_TAG ]; then
     # If we don't have a tag, we take the source from the debian/branch and merge upstream in it so we have the latest changes
     echo "\nBuilding snapshot package of ${PKG} from ${DEBIAN_BRANCH}.\n"
-    git merge ${UPSTREAM_BRANCH}
+    git merge --no-commit ${UPSTREAM_BRANCH}
     # We set the author of the Debian Changelog, only for snapshot builds (this doesn't seem to be used by gbp dch :(
     export DEBEMAIL="perfsonar-debian Autobuilder <debian@perfsonar.net>"
     # We can ignore NMU related warnings from LINTIAN as this package is not to be posted to official Debian repo
     LINTIAN_ARGS="--suppress-tags changelog-should-mention-nmu,source-nmu-has-incorrect-version-number"
     # And we generate the changelog ourselves, with a version number suitable for an upstream snapshot
-    gbp dch -S --ignore-branch -a
     timestamp=`date +%Y%m%d%H%M%S`
-    sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
-    git-buildpackage $GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}
+    if [ "$pscheduler_dir_level" ]; then
+        # pscheduler special
+        version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
+        new_version=${version%%-*}+${timestamp}-1
+        dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${version}' via Jenkins'
+    else
+        gbp dch -S --ignore-branch -a
+        sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
+        GBP_OPTS="$GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}"
+    fi
+    dpkgsign="-k8968F5F6"
 else
     # If we have a tag, we take the source from the git tag
     echo "\nBuilding release package of ${PKG} from ${DEBIAN_TAG}.\n"
@@ -79,7 +108,20 @@ else
     # - removing the leading debian/distro prefix
     # - removing the ending -1 debian-version field
     UPSTREAM_TAG=${DEBIAN_TAG##*\/}
-    git-buildpackage $GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}
+    GBP_OPTS="$GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}"
+    # We don't sign the release package as we don't have the packager's key
+    dpkgsign="-us -uc"
+fi
+
+# We package the upstream sources (tarball) from git with git-buildpackage
+if [ "$pscheduler_dir_level" ]; then
+    # Or with from our own tree for pscheduler (tarball will be different from upstream)
+    upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
+    if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ]; then
+        tar czf ../${package}_${upstream_version}.orig.tar.gz --exclude=debian .
+    fi
+else
+    git-buildpackage $GBP_OPTS
 fi
 [ $? -eq 0 ] || exit 1
 
@@ -87,8 +129,15 @@ fi
 git submodule deinit -f ${GIT_BUILDING_REPO}
 
 # Build the source package
-dpkg-buildpackage -uc -us -nc -d -S -i -I --source-option=--unapply-patches
+dpkg-buildpackage ${dpkgsign} -nc -d -S -i -I --source-option=--unapply-patches
 [ $? -eq 0 ] || exit 1
+if [ "$pscheduler_dir_level" ]; then
+    # With pscheduler repository structure, we must move the artefacts some levels up
+    cd ..
+    mv ${package}_* "${pscheduler_dir_level}/.."
+    cd ${pscheduler_dir_level}
+fi
+echo "\nPackage source for ${PKG} is built.\n"
 
 # Run Lintian on built package
 cd ..
