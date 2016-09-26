@@ -38,7 +38,7 @@ if [ ! -f debian/gbp.conf ]; then
         fi
         cd ${pscheduler_dir_level}
     else
-        echo "I don't recognise what you want me to build.  I stop."
+        echo "I don't recognise what you want me to build (pscheduler builds need to have the env variable 'package' set).  I stop."
         exit 1
     fi
 fi
@@ -92,6 +92,8 @@ if [ -z $DEBIAN_TAG ]; then
     timestamp=`date +%Y%m%d%H%M%S`
     if [ "$pscheduler_dir_level" ]; then
         # pscheduler special
+        # We take the package name from the changelog entry, as this is not necessarily the same as the directory name...
+        package=`awk 'NR==1 {print $1}' debian/changelog`
         version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
         upstream_version=${version%-*}
         if [ -e ../${package}_${upstream_version}.orig.tar.gz ]; then
