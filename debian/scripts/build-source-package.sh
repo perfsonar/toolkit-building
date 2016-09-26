@@ -93,8 +93,13 @@ if [ -z $DEBIAN_TAG ]; then
     if [ "$pscheduler_dir_level" ]; then
         # pscheduler special
         version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
-        new_version=${version%%-*}+${timestamp}-1
-        dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${version}' via Jenkins'
+        upstream_version=${version%-*}
+        if [ -e ../${package}_${upstream_version}.orig.tar.gz ]; then
+            echo "We have orig tarball in the repo, we don't touch the changelog."
+        else
+            new_version=${version%%-*}+${timestamp}-1
+            dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${version}' via Jenkins'
+        fi
     else
         gbp dch -S --ignore-branch -a
         sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
