@@ -98,8 +98,8 @@ if [ -z $DEBIAN_TAG ]; then
         package=`awk 'NR==1 {print $1}' debian/changelog`
         version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
         upstream_version=${version%-*}
-        if [[ -e ../${package}_${upstream_version}.orig.tar.gz ||
-            -e ../${package}_${upstream_version}.orig.tar.bz2 ]]; then
+        if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
+           [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
             echo "We have orig tarball in the repo, we don't touch the changelog."
         else
             new_version=${version%%-*}+${timestamp}-1
@@ -127,8 +127,8 @@ fi
 if [ "$pscheduler_dir_level" ]; then
     # Or with from our own tree for pscheduler (tarball will be different from upstream)
     upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
-    if ! [[ -e ../${package}_${upstream_version}.orig.tar.gz ||
-        -e ../${package}_${upstream_version}.orig.tar.bz2 ]]; then
+    if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ] &&
+       ! [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
         tar czf ../${package}_${upstream_version}.orig.tar.gz --exclude=debian .
     fi
 else
