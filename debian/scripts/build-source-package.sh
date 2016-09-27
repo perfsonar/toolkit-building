@@ -56,6 +56,8 @@ if [ -z $DEBIAN_TAG ]; then
     if [ ! "${DEBIAN_BRANCH%%\/*}" = "debian" ]; then
         echo "This (${DEBIAN_BRANCH}) doesn't look like a Debian branch for me to build, I'll quit."
         exit 1
+    else
+        export GIT_BRANCH=DEBIAN_BRANCH
     fi
 else
     # If we have a tag we check it out
