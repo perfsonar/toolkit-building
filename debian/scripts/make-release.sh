@@ -82,11 +82,16 @@ BUILD_DISTRO=`awk -F 'DIST=' '/builder/ {gsub(/[ \t]+.*$/, "", $2); print $2}' d
 # The versions and tags need to conform to our policy detailed at https://github.com/perfsonar/project/wiki/Versioning
 if grep -q '(native)' debian/source/format ; then
     # Native package don't have release numbers, only a version number
-    PKG_REL=''
+    VERSION=${PKG_VERSION%\~bpo*}
+    if [ $VERSION != $PKG_VERSION ]; then
+        PKG_REL="~bpo${PKG_VERSION#*\~bpo*}"
+    else
+        PKG_REL=''
+    fi
 else
+    VERSION=${PKG_VERSION%-*}
     PKG_REL="-${PKG_VERSION##*-}"
 fi
-VERSION=${PKG_VERSION%-*}
 UPSTREAM_VERSION=${VERSION/\~/-}
 DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL/\~/_}"
 
