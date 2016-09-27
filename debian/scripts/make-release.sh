@@ -80,10 +80,15 @@ CH_DISTRO=`awk 'NR==1 {gsub(/;$/, "", $3); print $3}' debian/changelog`
 BUILD_DISTRO=`awk -F 'DIST=' '/builder/ {gsub(/[ \t]+.*$/, "", $2); print $2}' debian/gbp.conf`
 
 # The versions and tags need to conform to our policy detailed at https://github.com/perfsonar/project/wiki/Versioning
-PKG_REL=${PKG_VERSION##*-}
+if grep -q '(native)' debian/source/format ; then
+    # Native package don't have release numbers, only a version number
+    PKG_REL=''
+else
+    PKG_REL="-${PKG_VERSION##*-}"
+fi
 VERSION=${PKG_VERSION%-*}
 UPSTREAM_VERSION=${VERSION/\~/-}
-DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}-${PKG_REL/\~/_}"
+DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL/\~/_}"
 
 # Check there is a corresponding upstream tag
 git tag -l | grep -q $UPSTREAM_VERSION
