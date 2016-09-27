@@ -26,7 +26,7 @@ git submodule deinit -f .
 
 # Kludge detection
 if [ ! -f debian/gbp.conf ]; then
-    # No debian directory, we're probably building pscheduler
+    # No debian directory, we're probably building pscheduler or a minor-package
     if [ -d "$package" ]; then
         # It seems we're right, now, are we at the correct location?
         cd ${package}
@@ -93,12 +93,13 @@ if [ -z $DEBIAN_TAG ]; then
     # And we generate the changelog ourselves, with a version number suitable for an upstream snapshot
     timestamp=`date +%Y%m%d%H%M%S`
     if [ "$pscheduler_dir_level" ]; then
-        # pscheduler special
+        # pscheduler/minor-packages special
         # We take the package name from the changelog entry, as this is not necessarily the same as the directory name...
         package=`awk 'NR==1 {print $1}' debian/changelog`
         version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
         upstream_version=${version%-*}
-        if [ -e ../${package}_${upstream_version}.orig.tar.gz ]; then
+        if [[ -e ../${package}_${upstream_version}.orig.tar.gz ||
+            -e ../${package}_${upstream_version}.orig.tar.bz2 ]]; then
             echo "We have orig tarball in the repo, we don't touch the changelog."
         else
             new_version=${version%%-*}+${timestamp}-1
@@ -126,7 +127,8 @@ fi
 if [ "$pscheduler_dir_level" ]; then
     # Or with from our own tree for pscheduler (tarball will be different from upstream)
     upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
-    if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ]; then
+    if ! [[ -e ../${package}_${upstream_version}.orig.tar.gz ||
+        -e ../${package}_${upstream_version}.orig.tar.bz2 ]]; then
         tar czf ../${package}_${upstream_version}.orig.tar.gz --exclude=debian .
     fi
 else
