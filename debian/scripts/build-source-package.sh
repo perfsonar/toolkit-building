@@ -38,7 +38,7 @@ if [ ! -f debian/gbp.conf ]; then
         fi
         cd ${pscheduler_dir_level}
     else
-        echo "I don't recognise what you want me to build (pscheduler builds need to have the env variable 'package' set).  I stop."
+        echo "I don't recognise what you want me to build (pscheduler/minor-packages builds need to have the env variable 'package' set).  I stop."
         exit 1
     fi
 fi
@@ -118,20 +118,26 @@ else
     # - removing the leading debian/distro prefix
     # - removing the ending -1 debian-version field
     UPSTREAM_TAG=${DEBIAN_TAG##*\/}
-    GBP_OPTS="$GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG%-*}"
+    UPSTREAM_TAG=${UPSTREAM_TAG%-*}
+    GBP_OPTS="$GBP_OPTS --git-upstream-tree=tag --git-upstream-tag=${UPSTREAM_TAG}"
     # We don't sign the release package as we don't have the packager's key
     dpkgsign="-us -uc"
 fi
 
-# We package the upstream sources (tarball) from git with git-buildpackage
+# We package the upstream sources (tarball) from git
 if [ "$pscheduler_dir_level" ]; then
-    # Or with from our own tree for pscheduler (tarball will be different from upstream)
+    # Directly calling git archive if pscheduler
     upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
     if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ] &&
        ! [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
-        tar czf ../${package}_${upstream_version}.orig.tar.gz --exclude=debian .
+        if [ -z $DEBIAN_TAG ]; then
+            git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_BRANCH}
+        else
+            git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_TAG}
+        fi
     fi
 else
+    # Or calling gbp for the other packages
     git-buildpackage $GBP_OPTS
 fi
 [ $? -eq 0 ] || exit 1
