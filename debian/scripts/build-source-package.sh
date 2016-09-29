@@ -37,7 +37,9 @@ if [ ! -f debian/gbp.conf ]; then
         else
             pscheduler_dir_level="."
         fi
+        # We take the package name from the changelog entry, as this is not necessarily the same as the directory name...
         cd ${pscheduler_dir_level}
+        package=`awk 'NR==1 {print $1}' debian/changelog`
     else
         echo
         echo "I don't recognise what you want me to build, pscheduler/minor-packages builds need to have the env variable 'package' set."
@@ -100,17 +102,14 @@ if [ -z $DEBIAN_TAG ]; then
     timestamp=`date +%Y%m%d%H%M%S`
     if [ "$pscheduler_dir_level" ]; then
         # pscheduler/minor-packages special
-        # We take the package name from the changelog entry, as this is not necessarily the same as the directory name...
-        package=`awk 'NR==1 {print $1}' debian/changelog`
-        version=`head -1 debian/changelog | sed 's/.* (//' | sed 's/) .*//'`
-        upstream_version=${version%-*}
+        upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
         if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
             echo "We have the orig tarball in the repo, we don't touch the changelog."
         else
-            new_version=${version%%-*}+${timestamp}-1
-            dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${version}' via Jenkins'
+            new_version=${upstream_version}+${timestamp}-1
+            dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${upstream_version}' via Jenkins'
         fi
     else
         gbp dch -S --ignore-branch -a
