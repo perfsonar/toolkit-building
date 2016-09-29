@@ -15,6 +15,11 @@
 SRC_DIR='source'
 GIT_BUILDING_REPO='toolkit-building'
 
+# If we are given a branch parameter, we must work on this branch
+if [ "${branch%%\/*}" = "debian" ]; then
+    git checkout ${branch}
+fi
+
 # Trick to enable the Git parameter plugin to work with the source directory where we checked out
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
 # This is a bug in the git-parameter plugin, see https://issues.jenkins-ci.org/browse/JENKINS-27726
