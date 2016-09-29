@@ -27,7 +27,7 @@ git submodule deinit -f .
 # Kludge detection
 if [ ! -f debian/gbp.conf ]; then
     # No debian directory, we're probably building pscheduler or a minor-package
-    if [ -d "$package" ]; then
+    if [ -d "${package}" ]; then
         # It seems we're right, now, are we at the correct location?
         cd ${package}
         if ! [ -d debian ]; then
@@ -38,7 +38,10 @@ if [ ! -f debian/gbp.conf ]; then
         fi
         cd ${pscheduler_dir_level}
     else
-        echo "I don't recognise what you want me to build (pscheduler/minor-packages builds need to have the env variable 'package' set).  I stop."
+        echo
+        echo "I don't recognise what you want me to build, pscheduler/minor-packages builds need to have the env variable 'package' set."
+        echo "package=${package} and I don't see a directory with this name.  I stop."
+        echo
         exit 1
     fi
 fi
@@ -47,14 +50,16 @@ fi
 DEBIAN_TAG=$tag
 if [ -z $DEBIAN_TAG ]; then
     # If we don't have a tag parameter, let's look at the branch parameter
-    if [ $branch = '-' ]; then
+    if [ "${branch}" = "-" ]; then
         # No tag and no branch parameter, we look which branch we're building from
         DEBIAN_BRANCH=`awk -F '=' '/debian-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
     else
         DEBIAN_BRANCH=$branch
     fi
     if [ ! "${DEBIAN_BRANCH%%\/*}" = "debian" ]; then
+        echo
         echo "This (${DEBIAN_BRANCH}) doesn't look like a Debian branch for me to build, I'll quit."
+        echo
         exit 1
     else
         export GIT_BRANCH=DEBIAN_BRANCH
@@ -101,7 +106,7 @@ if [ -z $DEBIAN_TAG ]; then
         if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
-            echo "We have orig tarball in the repo, we don't touch the changelog."
+            echo "We have the orig tarball in the repo, we don't touch the changelog."
         else
             new_version=${version%%-*}+${timestamp}-1
             dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${version}' via Jenkins'
