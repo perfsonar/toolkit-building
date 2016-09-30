@@ -133,14 +133,18 @@ fi
 # We package the upstream sources (tarball) from git
 if [ "$pscheduler_dir_level" ]; then
     # Directly calling git archive if pscheduler
-    upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
-    if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ] &&
-        ! [ -e ../${package}_${upstream_version}.orig.tar.xz ] &&
-        ! [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
-        if [ -z $DEBIAN_TAG ]; then
-            git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_BRANCH}
-        else
-            git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_TAG}
+    # Native package don't have upstream version, we don't need to create the upstream tarball
+    if ! grep -q '(native)' debian/source/format ; then
+        # We remove the -pkgrel suffix
+        upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
+        if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ] &&
+            ! [ -e ../${package}_${upstream_version}.orig.tar.xz ] &&
+            ! [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
+            if [ -z $DEBIAN_TAG ]; then
+                git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_BRANCH}
+            else
+                git archive -o ../${package}_${upstream_version}.orig.tar.gz ${UPSTREAM_TAG}
+            fi
         fi
     fi
 else
