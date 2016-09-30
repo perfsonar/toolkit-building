@@ -18,6 +18,7 @@ show_help() {
         You can call it with the following args:
             -a: add modified files to the commit (use `git commit -a`)
             -c: additional git options to be passed to `git commit`
+            -m: releases a minor package
             -n: performs a dry-run
             -t: additional git options to be passed to `git tag`
             -v: verbose
@@ -39,12 +40,14 @@ verbose() {
 # Defaults
 v=0
 dry_run=0
+minor_pkg=0
 
 # Parsing options
-while getopts "ac:nt:v" OPT; do
+while getopts "ac:mnt:v" OPT; do
     case $OPT in
         a) commit_a="-a" ;;
         c) commit_options=$OPTARG ;;
+        m) minor_pkg=1 ;;
         n) dry_run=1 ;;
         t) tag_options=$OPTARG ;;
         v) 
@@ -82,23 +85,28 @@ BUILD_DISTRO=`awk -F 'DIST=' '/builder/ {gsub(/[ \t]+.*$/, "", $2); print $2}' d
 # The versions and tags need to conform to our policy detailed at https://github.com/perfsonar/project/wiki/Versioning
 if grep -q '(native)' debian/source/format ; then
     # Native package don't have release numbers, only a version number
-    VERSION=${PKG_VERSION%\~bpo*}
-    if [ $VERSION != $PKG_VERSION ]; then
-        PKG_REL="~bpo${PKG_VERSION#*\~bpo*}"
+    VERSION=${PKG_VERSION}
+    # We don't have an upstream version either
+    UPSTREAM_VERSION=${VERSION}
+    if [ "${minor_pkg}" -eq 1 ]; then
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${PKG_VERSION/\~/_}"
     else
-        PKG_REL=''
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG_VERSION/\~/_}"
     fi
 else
     VERSION=${PKG_VERSION%-*}
     PKG_REL="-${PKG_VERSION##*-}"
-fi
-UPSTREAM_VERSION=${VERSION/\~/-}
-DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL/\~/_}"
-
-# Check there is a corresponding upstream tag
-git tag -l | grep -q $UPSTREAM_VERSION
-if [ $? -ne 0 ]; then
-    error "$PKG_VERSION of $PKG doesn't seem to have a corresponding upstream tag."
+    UPSTREAM_VERSION=${VERSION/\~/-}
+    if [ "${minor_pkg}" -eq 1 ]; then
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${UPSTREAM_VERSION}${PKG_REL/\~/_}"
+    else
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL/\~/_}"
+        # Check there is a corresponding upstream tag
+        git tag -l | grep -q $UPSTREAM_VERSION
+        if [ $? -ne 0 ]; then
+            error "$PKG_VERSION of $PKG doesn't seem to have a corresponding upstream tag."
+        fi
+    fi
 fi
 
 # Check there is not an already existing Debian tag
@@ -109,10 +117,18 @@ fi
 
 # Check distro field in debian/changelog
 if [ "$VERSION" = "$UPSTREAM_VERSION" ]; then
-    verbose "We have a final release! Celebrate for $PKG_VERSION coming from upstream $UPSTREAM_VERSION"
+    if ! grep -q '(native)' debian/source/format ; then
+        verbose "We have a final release! Celebrate for $PKG_VERSION coming from upstream $UPSTREAM_VERSION"
+    else
+        verbose "We have a final release! Celebrate for $PKG_VERSION (native package)."
+    fi
     REL="release"
 else
-    verbose "We have an alpha, beta or candidate release: $PKG_VERSION coming from upstream $UPSTREAM_VERSION"
+    if ! grep -q '(native)' debian/source/format ; then
+        verbose "We have an alpha, beta or candidate release: $PKG_VERSION coming from upstream $UPSTREAM_VERSION"
+    else
+        verbose "We have an alpha, beta or candidate release: $PKG_VERSION (native package)."
+    fi
     REL="staging"
 fi
 PS_DEB_REP="perfsonar-${BUILD_DISTRO}-${REL}"
