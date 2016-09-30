@@ -88,19 +88,21 @@ if grep -q '(native)' debian/source/format ; then
     VERSION=${PKG_VERSION}
     # We don't have an upstream version either
     UPSTREAM_VERSION=${VERSION}
+    TAG_VERSION=${PKG_VERSION/\~bpo/_bpo}
+    TAG_VERSION=${TAG_VERSION//\~/-}
     if [ "${minor_pkg}" -eq 1 ]; then
-        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${PKG_VERSION/\~/_}"
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${TAG_VERSION}"
     else
-        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG_VERSION/\~/_}"
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${TAG_VERSION}"
     fi
 else
     VERSION=${PKG_VERSION%-*}
     PKG_REL="-${PKG_VERSION##*-}"
     UPSTREAM_VERSION=${VERSION/\~/-}
     if [ "${minor_pkg}" -eq 1 ]; then
-        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${UPSTREAM_VERSION}${PKG_REL/\~/_}"
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${PKG}-${UPSTREAM_VERSION}${PKG_REL//\~/_}"
     else
-        DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL/\~/_}"
+        DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL//\~/_}"
         # Check there is a corresponding upstream tag
         git tag -l | grep -q $UPSTREAM_VERSION
         if [ $? -ne 0 ]; then
