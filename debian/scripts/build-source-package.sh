@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 # This script builds a perfSONAR Debian source package from a git repository checkout.
 # It uses git-buildpackage and its configuration for the package in debian/gbp.conf
 # It is made to work with Jenkins, for that purpose the git repository need to be checked out
@@ -103,14 +103,15 @@ if [ -z $DEBIAN_TAG ]; then
     if [ "$pscheduler_dir_level" ]; then
         # pscheduler/minor-packages special
         upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
-#        if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
-#            [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
-#            [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
-#            echo "We have the orig tarball in the repo, we don't touch the changelog."
-#        else
+        if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
+            [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
+            [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
+            # We have the orig tarball in the repo, we only change the release number of the package.
+            new_version=${upstream_version}-1+${timestamp}
+        else
             new_version=${upstream_version}+${timestamp}-1
-            dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for unreleased '${upstream_version}' via Jenkins'
-#        fi
+        fi
+        dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for '${upstream_version}' via Jenkins'
     else
         gbp dch -S --ignore-branch -a
         sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
