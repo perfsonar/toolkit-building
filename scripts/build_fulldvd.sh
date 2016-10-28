@@ -251,7 +251,7 @@ EOF
 
 sed -e "s/\[BUILD_VERSION\]/$BUILD_VERSION/" \
     -e "s/\[KS_FILE\]/ks.cfg/" \
-    isolinux/centos$BUILD_OS_VERSION_MAJOR.cfg > $TEMP_NEW_ISO_MNT/isolinux/isolinux.cfg
+    $SCRIPTS_DIRECTORY/../isolinux/centos$BUILD_OS_VERSION_MAJOR.cfg > $TEMP_NEW_ISO_MNT/isolinux/isolinux.cfg
 
 ########################################
 # Make New ISO
