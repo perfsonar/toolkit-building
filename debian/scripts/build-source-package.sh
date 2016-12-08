@@ -102,7 +102,12 @@ if [ -z $DEBIAN_TAG ]; then
     timestamp=`date +%Y%m%d%H%M%S`
     if [ "$pscheduler_dir_level" ]; then
         # pscheduler/minor-packages special
-        upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
+        if ! grep -q '(native)' debian/source/format ; then
+            upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
+        else
+            # For native packages, we take the full version string as upstream_version
+            upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)$/\1/p'`
+        fi
         if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
             [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
