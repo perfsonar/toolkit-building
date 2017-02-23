@@ -19,10 +19,7 @@ GIT_BUILDING_REPO='toolkit-building'
 # the source code. Otherwise, the Git parameter plugin cannot find the tags existing in the repository
 # This is a bug in the git-parameter plugin, see https://issues.jenkins-ci.org/browse/JENKINS-27726
 ln -s ${SRC_DIR}/.git* .
-
-# We don't want to package any submodule
 cd ${SRC_DIR}
-git submodule deinit -f .
 
 # Kludge detection, this need to be done in the correct branch!
 # This means that the Jenkins job must have "*/${branch}" as the Branch to be build.
@@ -71,6 +68,9 @@ else
     # If we have a tag we check it out
     git checkout ${DEBIAN_TAG}
 fi
+
+# We don't want to package any submodule
+git submodule deinit -f .
 
 # Get upstream branch from gbp.conf and making it a local branch so we can merge and build tarball from it
 UPSTREAM_BRANCH=`awk -F '=' '/upstream-branch/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' debian/gbp.conf`
