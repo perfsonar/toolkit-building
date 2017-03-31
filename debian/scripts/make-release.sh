@@ -2,7 +2,7 @@
 # Usage info
 show_help() {
     cat << EOF
-        Usage: ${0##*/} [-a]  [- commit_options] [-n] [-t tag_options] [-v]
+        Usage: ${0##*/} [-a]  [-c commit_options] [-n] [-t tag_options] [-v]
         This script releases a new version (final or RC) of a perfSONAR Debian package.
         It looks for the version of the package in the debian/changelog file. It creates a
         new git commit with all files ready to be commited and add the corresponding tag.
