@@ -160,7 +160,7 @@ fi
 [ $? -eq 0 ] || exit 1
 
 # Remove the GIT_BUILDING_REPO in case it re-emerged (with the --git-submodules option)
-if [ ${PKG} == maddash ]; then
+if [ "${PKG}" = "maddash" ]; then
     git submodule deinit -f ${GIT_BUILDING_REPO}
 fi
 
