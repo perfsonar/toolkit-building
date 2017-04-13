@@ -100,28 +100,23 @@ if [ -z $DEBIAN_TAG ]; then
     LINTIAN_ARGS="--suppress-tags changelog-should-mention-nmu,source-nmu-has-incorrect-version-number"
     # And we generate the changelog ourselves, with a version number suitable for an upstream snapshot
     timestamp=`date +%Y%m%d%H%M%S`
-    if [ "$pscheduler_dir_level" ]; then
-        # pscheduler/minor-packages special
-        if ! grep -q '(native)' debian/source/format ; then
-            upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
-        else
-            # For native packages, we take the full version string as upstream_version
-            upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)$/\1/p'`
-        fi
-        if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
-            [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
-            [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
-            # We have the orig tarball in the repo, we only change the release number of the package.
-            new_version=${upstream_version}-1+${timestamp}
-        else
-            new_version=${upstream_version}+${timestamp}-1
-        fi
-        dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for '${upstream_version}' via Jenkins'
+    if ! grep -q '(native)' debian/source/format ; then
+        upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
     else
-        gbp dch -S --ignore-branch -a
-        sed -i "1 s/\((.*\)\(-[0-9]\{1,\}\)\(.*\))/\1+${timestamp}\3\2)/" debian/changelog
-        GBP_OPTS="$GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}"
+        # For native packages, we take the full version string as upstream_version
+        upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)$/\1/p'`
     fi
+    # pscheduler/minor-packages special
+    if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
+        [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
+        [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
+        # We have the orig tarball in the repo, we only change the release number of the package.
+        new_version=${upstream_version}-1+${timestamp}
+    else
+        new_version=${upstream_version}+${timestamp}-1
+    fi
+    dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for '${upstream_version}' via Jenkins'
+    GBP_OPTS="$GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}"
     dpkgsign="-k8968F5F6"
 else
     # If we have a tag, we take the source from the git tag
