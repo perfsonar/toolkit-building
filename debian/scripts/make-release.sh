@@ -104,16 +104,14 @@ else
     else
         DEBIAN_TAG="debian/${BUILD_DISTRO}/${UPSTREAM_VERSION}${PKG_REL//\~/_}"
         # Check there is a corresponding upstream tag
-        git tag -l | grep -q $UPSTREAM_VERSION
-        if [ $? -ne 0 ]; then
-            error "$PKG_VERSION of $PKG doesn't seem to have a corresponding upstream tag."
+        if ! git tag -l | grep -q "^${UPSTREAM_VERSION}$" ; then
+            error "$PKG_VERSION of $PKG doesn't seem to have a corresponding upstream tag (something like ${UPSTREAM_VERSION})."
         fi
     fi
 fi
 
 # Check there is not an already existing Debian tag
-git tag -l | grep -q $DEBIAN_TAG
-if [ $? -eq 0 ]; then
+if git tag -l | grep -q "^${DEBIAN_TAG}$" ; then
     error "$DEBIAN_TAG is already existing in this repository."
 fi
 
