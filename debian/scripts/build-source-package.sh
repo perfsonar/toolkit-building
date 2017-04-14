@@ -102,18 +102,21 @@ if [ -z $DEBIAN_TAG ]; then
     timestamp=`date +%Y%m%d%H%M%S`
     if ! grep -q '(native)' debian/source/format ; then
         upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
+        pkg_revision="-1"
     else
         # For native packages, we take the full version string as upstream_version
         upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)$/\1/p'`
+        # And we don't use any revision number
+        pkg_revision=""
     fi
     # pscheduler/minor-packages special
     if [ -e ../${package}_${upstream_version}.orig.tar.gz ] ||
         [ -e ../${package}_${upstream_version}.orig.tar.xz ] ||
         [ -e ../${package}_${upstream_version}.orig.tar.bz2 ]; then
         # We have the orig tarball in the repo, we only change the release number of the package.
-        new_version=${upstream_version}-1+${timestamp}
+        new_version=${upstream_version}${pkg_revision}+${timestamp}
     else
-        new_version=${upstream_version}+${timestamp}-1
+        new_version=${upstream_version}+${timestamp}${pkg_revision}
     fi
     dch -b --distribution=UNRELEASED --newversion=${new_version} -- 'SNAPSHOT autobuild for '${upstream_version}' via Jenkins'
     GBP_OPTS="$GBP_OPTS --git-upstream-tree=branch --git-upstream-branch=${UPSTREAM_BRANCH}"
