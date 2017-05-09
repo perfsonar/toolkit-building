@@ -182,3 +182,6 @@ else
     lintian ${LINTIAN_ARGS} --show-overrides ${PKG}*.dsc
 fi
 
+# Temporary workaround for https://issues.jenkins-ci.org/browse/JENKINS-39800 as it looks we're hitting it sometimes.
+sleep 5
+
