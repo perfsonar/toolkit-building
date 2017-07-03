@@ -139,6 +139,18 @@ if [ "$pscheduler_dir_level" ]; then
     # Directly calling git archive if pscheduler
     # Native package don't have upstream version, we don't need to create the upstream tarball
     if ! grep -q '(native)' debian/source/format ; then
+        # Backward kludge...
+        cd ../$pscheduler_dir_level
+        # We first check that the RPM version matches the DEB version
+        if ! toolkit-building/debian/scripts/check-deb-rpm-version.sh ${package} ; then
+            pwd
+            exit 1
+        fi
+        # And forward kludge again
+        cd ${package}
+        if ! [ -d debian ]; then
+            cd */debian/..
+        fi
         # We remove the -pkgrel suffix
         upstream_version=`dpkg-parsechangelog | sed -n 's/Version: \(.*\)-[^-]*$/\1/p'`
         if ! [ -e ../${package}_${upstream_version}.orig.tar.gz ] &&
