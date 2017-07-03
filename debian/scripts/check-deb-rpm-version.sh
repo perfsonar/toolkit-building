@@ -36,8 +36,8 @@ RPM_VERSION=`awk '/^Version:/ {print $2}' $specfile`
 # Getting DEB version number
 if [ -f $pkg/debian/changelog ]; then
     changelog=$pkg/debian/changelog
-elif [ -f $pkg/$pkg/debian/changelog ]; then
-    changelog=$pkg/$pkg/debian/changelog
+elif [ -f $pkg/*/debian/changelog ]; then
+    changelog=$pkg/*/debian/changelog
 else
     echo "No changelog file for $pkg found at $pkg/debian/changelog nor at $pkg/$pkg/debian/changelog"
     exit 1
