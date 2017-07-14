@@ -1,13 +1,9 @@
-diff -ur -N a/config-generic b/config-generic
---- a/config-generic	2014-02-11 10:49:00.386990013 -0500
-+++ b/config-generic	2014-02-06 14:21:58.086405378 -0500
-@@ -4158,3 +4158,14 @@
+--- a/config-generic	2017-04-19 10:57:47.389270902 -0700
++++ b/config-generic	2017-04-19 10:57:56.208121944 -0700
+@@ -4166,3 +4166,11 @@
  
- CONFIG_MEMORY_FAILURE=y
- CONFIG_HWPOISON_INJECT=m
-+
-+# AUFS options
-+CONFIG_AUFS_FS=m
+ # CONFIG_X86_SYSFB is not set
+ # CONFIG_FB_SIMPLE is not set
 +
 +# WEB100 options
 +CONFIG_WEB100=y
@@ -49,16 +45,6 @@ diff -ur -N a/kernel.spec b/kernel.spec
  ApplyOptionalPatch linux-kernel-test.patch
  
  # Any further pre-build tree manipulations happen here.
-@@ -1732,6 +1745,9 @@
- %endif
- 
- %changelog
-+* Fri Jun 20 2014 Michael Johnson <mj82@grnoc.iu.edu> [2.6.32-431.20.3.el6.web100]
-+- Adding web100 patches for perfSONAR Toolkit
-+
- * Thu Jun 19 2014 Johnny Hughes <johnny@centos.org> [2.6.32-431.20.3.el6.centos]
- - Roll in CentOS Branding
-
 diff -ur -N a/Makefile.patch b/Makefile.patch
 --- a/Makefile.patch	1969-12-31 19:00:00.000000000 -0500
 +++ b/Makefile.patch	2014-02-06 14:21:58.076405378 -0500
@@ -1684,11 +1670,11 @@ diff -ur -N a/web100-2.6.32-2.5.27-201001301335.el6.patch b/web100-2.6.32-2.5.27
 + extern int do_sysctl (int __user *name, int nlen,
 + 		      void __user *oldval, size_t __user *oldlenp,
 +diff -ur --new-file a/include/linux/tcp.h b/include/linux/tcp.h
-+--- a/include/linux/tcp.h	2012-06-13 14:41:10.000000000 -0700
-++++ b/include/linux/tcp.h	2012-07-12 08:56:06.000000000 -0700
-+@@ -451,6 +451,10 @@
-+ 				 * The total number of segments sent.
++--- a/include/linux/tcp.h	2017-03-21 07:46:50.000000000 -0700
+++++ b/include/linux/tcp.h	2017-04-19 12:37:26.333073898 -0700
++@@ -453,6 +453,10 @@
 + 				 */
++ 	u32	last_oow_ack_time;  /* timestamp of last out-of-window ACK */
 + #endif
 ++
 ++#ifdef CONFIG_WEB100_STATS
