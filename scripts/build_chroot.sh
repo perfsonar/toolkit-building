@@ -30,8 +30,9 @@ if [ -z "$EPEL_RELEASE_RPM" ]; then
     EPEL_REPO="$EPEL_REPO/e"
     EPEL_RELEASE_RPM=$(wget -q -O- $EPEL_REPO | grep -o -P "epel-release-.*?rpm" | head -1)
 fi
-I2_RPM=$(wget -q -O- $I2_REPO | grep -o -P "Internet2-repo-.*?rpm" | head -1)
-I2_STAGING_RPM=$(wget -q -O- $I2_REPO | grep -o -P "Internet2-repo-staging.*?rpm" | head -1)
+
+I2_RPM=$(wget -q -O- $I2_REPO | grep -o -P "perfSONAR-repo-.*?rpm" | head -1)
+I2_STAGING_RPM=$(wget -q -O- $I2_REPO | grep -o -P "perfSONAR-repo-staging.*?rpm" | head -1)
 
 mkdir -p $CHROOT_DIR
 mkdir -p $CHROOT_DIR/var/lib/rpm
