@@ -142,7 +142,7 @@ if [ "$pscheduler_dir_level" ]; then
         # Backward kludge...
         cd ../$pscheduler_dir_level
         # We first check that the RPM version matches the DEB version (but not for minor-packages)
-        if ! git remote get-url origin | grep minor-packages ; then
+        if ! git remote -v show | grep minor-packages ; then
             if ! toolkit-building/debian/scripts/check-deb-rpm-version.sh ${package} ; then
                 pwd
                 exit 1
