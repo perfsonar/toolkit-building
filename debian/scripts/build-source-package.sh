@@ -145,7 +145,7 @@ if [ "$pscheduler_dir_level" ]; then
         if ! git remote -v show | grep minor-packages ; then
             if ! toolkit-building/debian/scripts/check-deb-rpm-version.sh ${package} ; then
                 pwd
-                exit 1
+#                exit 1
             fi
         fi
         # And forward kludge again
