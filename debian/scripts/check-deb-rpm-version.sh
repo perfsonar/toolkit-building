@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/bash -x
 # Script to check that the version of Debian packages is the same as the RPM version.
 # Versions in .spec file and in the debian/changelog files are compared.
 
@@ -42,7 +42,7 @@ else
     echo "No changelog file for $pkg found at $pkg/debian/changelog nor at $pkg/$pkg/debian/changelog"
     exit 1
 fi
-DEBIAN_VERSION=`awk 'NR==1 {gsub(/^\(|\+20[0-9]+|(~[0-9]+\.rc[0-9]+)?-[0-9]+(~bpo[0-9]+\+[0-9]+)?\)$/, "", $2); print $2}' $changelog`
+DEBIAN_VERSION=`gawk 'NR==1 {gsub(/^\(|\+20[0-9]+|(~[0-9]+\.rc[0-9]+)?-[0-9]+(~bpo[0-9]+\+[0-9]+)?\)$/, "", $2); print $2}' $changelog`
 
 # Comparing
 if [ "$RPM_VERSION" != "$DEBIAN_VERSION" ]; then
