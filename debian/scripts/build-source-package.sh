@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 # This script builds a perfSONAR Debian source package from a git repository checkout.
 # It uses git-buildpackage and its configuration for the package in debian/gbp.conf
 # It is made to work with Jenkins, for that purpose the git repository need to be checked out
