@@ -141,10 +141,12 @@ if [ "$pscheduler_dir_level" ]; then
     if ! grep -q '(native)' debian/source/format ; then
         # Backward kludge...
         cd ../$pscheduler_dir_level
-        # We first check that the RPM version matches the DEB version
-        if ! toolkit-building/debian/scripts/check-deb-rpm-version.sh ${package} ; then
-            pwd
-            exit 1
+        # We first check that the RPM version matches the DEB version (but not for minor-packages)
+        if ! git remote -v show | grep minor-packages ; then
+            if ! toolkit-building/debian/scripts/check-deb-rpm-version.sh ${package} ; then
+                pwd
+#                exit 1
+            fi
         fi
         # And forward kludge again
         cd ${package}

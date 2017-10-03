@@ -3,7 +3,7 @@
 This repository contains script to build the NetInstall and Full DVD ISOs of the Toolkit distribution.
 
 
-##Building the NetInstall
+## Building the NetInstall
 
 The basic process is as follows:
 
@@ -13,7 +13,7 @@ The basic process is as follows:
 
 For more detailed instructions see https://github.com/perfsonar/project/wiki/CentOS-ISO-Build-Instructions#building-the-netinstall
 
-##Building the Full DVD
+## Building the Full DVD
 
 The basic process is as follows:
 
@@ -24,7 +24,7 @@ The basic process is as follows:
 
 See https://github.com/perfsonar/project/wiki/CentOS-ISO-Build-Instructions
 
-##Pre-releases (Alphas, Release Candidates, etc)
+## Pre-releases (Alphas, Release Candidates, etc)
 When preparing a pre-release, use the *pre-releases* branch. It is already setup to point at staging repositories. In some cases you may just need to change the version numbers in the following files:
 
 * scripts/build_fulldvd.sh
