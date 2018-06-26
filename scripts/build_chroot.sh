@@ -21,7 +21,7 @@ fi
 
 #RPMS
 CENTOS_REPO="http://mirror.centos.org/centos/$OS_VERSION/os/$ARCHITECTURE/Packages"
-EPEL_REPO="http://download.fedoraproject.org/pub/epel/$OS_VERSION/$ARCHITECTURE"
+EPEL_REPO="http://download.fedoraproject.org/pub/epel/$OS_VERSION/$ARCHITECTURE/Packages"
 I2_REPO="http://software.internet2.edu/rpms/el$OS_VERSION/$ARCHITECTURE/RPMS.main"
 
 CENTOS_RELEASE_RPM=$(wget -q -O- $CENTOS_REPO | grep -o -P "centos-release-.*?rpm" | head -1)
