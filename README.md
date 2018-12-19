@@ -9,7 +9,7 @@ Run the following (replacing VERSION with the version number you want applied to
 vagrant up
 vagrant ssh
 cd /vagrant
-sudo ./scripts/build_chroot.sh ~/chroot x86_64 7
+sudo ./scripts/build_chroot.sh /home/vagrant/chroot x86_64 7
 sudo ./scripts/build_netinstall.sh --arch x86_64 --os-version 7 --ps-version VERSION
 sudo ./scripts/build_fulldvd.sh --arch x86_64 --chroot /home/vagrant/chroot --os-version 7 --ps-version VERSION
 ```
