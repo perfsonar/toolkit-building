@@ -9,6 +9,7 @@ Run the following (replacing VERSION with the version number you want applied to
 vagrant up
 vagrant ssh
 cd /vagrant
+sudo ./scripts/build_chroot.sh /home/vagrant/chroot x86_64 7
 sudo ./scripts/build_netinstall.sh --arch x86_64 --os-version 7 --ps-version VERSION
 sudo ./scripts/build_fulldvd.sh --arch x86_64 --chroot /home/vagrant/chroot --os-version 7 --ps-version VERSION
 ```
@@ -45,7 +46,7 @@ For more detailed instructions see https://github.com/perfsonar/project/wiki/Cen
 The basic process is as follows:
 
 ```bash
-./scripts/build_chroot.sh /path/to/chroot <i686|x86_64>
+./scripts/build_chroot.sh /path/to/chroot <i686|x86_64> <6|7>
 ./scripts/build_full_dvd.sh --chroot /path/to/chroot --arch <i386|x86_64> --os-version <6|7> --ps-version VERSION
 ```
 

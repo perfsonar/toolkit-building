@@ -87,8 +87,7 @@ fi
 ####################################
 # Configuration that often changes
 ####################################
-BUILD_VERSION="${BUILD_VERSION:-3.5.1}" #perfSONAR version
-BUILD_OS_VERSION="${BUILD_OS_VERSION:-6.8}" #CentOS version
+BUILD_OS_VERSION="${BUILD_OS_VERSION:-7}" #CentOS version
 BUILD_OS_VERSION_MAJOR=${BUILD_OS_VERSION%.*}
 
 ##############################

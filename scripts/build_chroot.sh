@@ -1,8 +1,9 @@
 #!/bin/bash
 
 CHROOT_DIR=$1
-ARCHITECTURE=$2
-OS_VERSION=${3:-6}
+ARCHITECTURE=${2-"x86_64"}
+OS_VERSION=${3:-7}
+PS_VERSION=${4:-"latest"}
 
 if [ "$(id -u)" != 0 ]; then
 	echo "Error: SuperUser privileges required to use this script."
@@ -22,7 +23,8 @@ fi
 #RPMS
 CENTOS_REPO="http://mirror.centos.org/centos/$OS_VERSION/os/$ARCHITECTURE/Packages"
 EPEL_REPO="http://download.fedoraproject.org/pub/epel/$OS_VERSION/$ARCHITECTURE/Packages"
-I2_REPO="http://software.internet2.edu/rpms/el$OS_VERSION/$ARCHITECTURE/RPMS.main"
+#Build from staging since we usually do this pre-release
+PS_REPO="https://perfsonar-dev3.grnoc.iu.edu/staging/el/$OS_VERSION/$ARCHITECTURE/perfsonar/$PS_VERSION/packages"
 
 CENTOS_RELEASE_RPM=$(wget -q -O- $CENTOS_REPO | grep -o -P "centos-release-.*?rpm" | head -1)
 EPEL_RELEASE_RPM=$(wget -q -O- $EPEL_REPO | grep -o -P "epel-release-.*?rpm" | head -1)
@@ -30,9 +32,7 @@ if [ -z "$EPEL_RELEASE_RPM" ]; then
     EPEL_REPO="$EPEL_REPO/e"
     EPEL_RELEASE_RPM=$(wget -q -O- $EPEL_REPO | grep -o -P "epel-release-.*?rpm" | head -1)
 fi
-
-I2_RPM=$(wget -q -O- $I2_REPO | grep -o -P "perfSONAR-repo-.*?rpm" | head -1)
-I2_STAGING_RPM=$(wget -q -O- $I2_REPO | grep -o -P "perfSONAR-repo-staging.*?rpm" | head -1)
+PS_RPM=$(wget -q -O- $PS_REPO | grep -o -P "perfSONAR-repo-staging.*?rpm" | head -1)
 
 mkdir -p $CHROOT_DIR
 mkdir -p $CHROOT_DIR/var/lib/rpm
@@ -47,7 +47,7 @@ for gpg_key in $CHROOT_DIR/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-*$OS_VERSION; do
 done
 
 setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y rpm-build yum anaconda anaconda-runtime createrepo mkisofs
-setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y "$EPEL_REPO/$EPEL_RELEASE_RPM" "$I2_REPO/$I2_RPM" "$I2_REPO/$I2_STAGING_RPM"
+setarch $ARCHITECTURE yum --installroot=$CHROOT_DIR install -y "$EPEL_REPO/$EPEL_RELEASE_RPM" "$PS_REPO/$PS_RPM"
 
 #make sure web100 is available
 if [ "$OS_VERSION" -lt 7 ]; then
